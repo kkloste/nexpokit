@@ -1,15 +1,3 @@
-%% 
-% 
-%
-% Column-wise expm via Gauss-Southwell iteration
-% on truncated power series approximation to e^X
-
-
-% ***** CURRENTLY CODED SPECIFICALLY FOR A = G*D^-1
-% inputing any other kind of matrix A will probably
-% not work well, and may take a long time to converge
-
-
 function [y,iter] = gexpm(A,c,tol,N,a,l)
 % gexpm(A) 	returns y as an approximation of
 %		the c^th column of e^(a*(A-l*I))
@@ -24,6 +12,15 @@ function [y,iter] = gexpm(A,c,tol,N,a,l)
 %		with the residual in the GS iteration having
 %		1-norm < tol. 'N' is the degree of the truncated
 %		power series that is used to approximate e^A
+
+% Column-wise expm via Gauss-Southwell iteration
+% on truncated power series approximation to e^X
+%
+% ***** CURRENTLY CODED SPECIFICALLY FOR A = G*D^-1
+% inputing any other kind of matrix A will probably
+% not work well, and may take a long time to converge
+
+
 
 format long g;
 n = size(A,1);
