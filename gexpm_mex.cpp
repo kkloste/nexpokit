@@ -30,11 +30,11 @@ void gexpm(const mwSize n, const mwIndex* cp, const mwIndex* ari, const double* 
            const mwIndex c, const mwIndex N,  const double tol, const mwIndex maxsteps, 
            double* y)
 {
+    //mexPrintf("Input n=%i N=%i c=%i tol=%i maxsteps=%i\n", n, N, c, tol, maxsteps);
     mwIndex M = n*N;
     double sumresid = 0.;
     
     // allocate data 
-    std::vector<double> x(M,0.);
     std::vector<double> rvec(M,0.);
     double *r = &rvec[0];
     
@@ -46,6 +46,8 @@ void gexpm(const mwSize n, const mwIndex* cp, const mwIndex* ari, const double* 
     
     // i is the node index, j is the "step"
     #define rentry(i,j) ((i)+(j)*n)
+    
+    // mexPrintf("Init...\n");
  
     // set the initial residual, add to the heap, and update
     r[rentry(c,0)] = 1;
@@ -55,6 +57,7 @@ void gexpm(const mwSize n, const mwIndex* cp, const mwIndex* ari, const double* 
     hsize++;
     heap_up(hsize-1, hsize, T, L, r);
     
+    //mexPrintf("Loop...\n");
     
     for (mwIndex iter = 0; iter < maxsteps; ++iter) {
         
@@ -72,10 +75,12 @@ void gexpm(const mwSize n, const mwIndex* cp, const mwIndex* ari, const double* 
         
         // STEP 1: pop top element off of heap
         mwIndex ri = T[0];
-        T[0] = T[n-1];
+        T[0] = T[hsize-1];
         L[T[0]] = 0;
         L[ri] = M+1; /* the null location, the order here is important! */
         hsize--;
+        // mexPrintf("step %05i - popped ri=%3i i=%3i j=%3i rij=%.18e\n",
+        //             iter, ri, ri%n, ri/n, r[ri]);
         heap_down(0, hsize, T, L, r);
         
         // decode incides i,j
@@ -90,6 +95,7 @@ void gexpm(const mwSize n, const mwIndex* cp, const mwIndex* ari, const double* 
         // update r, no need to update heap here 
         r[ri] = 0;
         sumresid -= rij;
+        double rijs = rij/(double)(j+1);
         
         if (j == N-1) {
             // this is the terminal case, and so we add the column of A 
@@ -97,12 +103,11 @@ void gexpm(const mwSize n, const mwIndex* cp, const mwIndex* ari, const double* 
             for (mwIndex nzi=cp[i]; nzi < cp[i+1]; ++nzi) {
                 mwIndex v = ari[nzi];
                 double ajv = a[nzi];
-                y[v] += ajv*rij/(double)(N);
+                y[v] += ajv*rijs;
             }
         } else {
             // this is the interior case, and so we add the column of A 
             // to the residual at the next time step.
-            double rijs = rij/(double)(j+1);
             for (mwIndex nzi=cp[i]; nzi < cp[i+1]; ++nzi) {
                 mwIndex v = ari[nzi];
                 double ajv = a[nzi];
@@ -155,6 +160,13 @@ void mexFunction(
     double* a = mxGetPr(A);
     
     double* y = mxGetPr(pargout[0]);
+    
+    // mexPrintf("Starting call \n");
+    
+    mxAssert(N > 0, "N must be bigger than 0");
+    mxAssert(tol > 0 && tol <= 1, "tol must be 0 < tol <= 1");
+    mxAssert(c >= 0 && c < n, "column c must be 1 <= c <= n");
+    mxAssert(maxsteps > 0, "we must have maxsteps >= 0");
     
     gexpm(n, cp, ri, a, // sparse matrix
           c, N, tol, maxsteps, // parameters

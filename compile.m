@@ -1,1 +1,1 @@
-mex -largeArrayDims -O gexpm_mex.cpp CXXFLAGS="\$CXXFLAGS -Wall"
+mex -largeArrayDims -g gexpm_mex.cpp CXXFLAGS="\$CXXFLAGS -Wall"
