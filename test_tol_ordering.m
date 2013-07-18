@@ -2,7 +2,7 @@
 tols = [1e-2, 1e-3, 1e-4, 1e-5, 1e-6, 1e-7];
 ntrials = 100;
 topks = [25,100];
-nets = 5:6;
+nets = [5:6 14 15];
 
 clear record recordnn;
 
@@ -44,22 +44,20 @@ for network_id=nets;
         for ti=1:numel(tols)
             tol = tols(ti);
             xapprox = gexpmq_mex(P,j,11,tol,10*n);
-            [~,pxa] = sort(xapprox,'descend');
             xapproxnn = xapprox;
             xapproxnn(j) = -Inf;
             xapproxnn(logical(A(:,j))) = -Inf;
-            [~,pxann] = sort(xapproxnn,'descend');
             
             for ki=1:numel(topks)
                 k = min(topks(ki),n);
-                record(network_id,ti,t,ki) = numel(intersect(px(1:k),pxa(1:k)))/k;
+                record(network_id,ti,t,ki) = corr(xapprox(px(1:k)),xtrue(px(1:k)),'type','Kendall');
             end
             
             for ki=1:numel(topks)
                 k = min(topks(ki),nleft);
-                recordnn(network_id,ti,t,ki) = numel(intersect(pxnn(1:k),pxann(1:k)))/k;
+                recordnn(network_id,ti,t,ki) = corr(xapproxnn(pxnn(1:k)),xtruenn(pxnn(1:k)),'type','Kendall');
             end
         end
     end
 end
-save 'test_tol_accuracy.mat' record recordnn tols ntrials topks nets;
+save 'test_tol_ordering.mat' record recordnn tols ntrials topks nets;
