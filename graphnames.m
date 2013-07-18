@@ -17,3 +17,4 @@ function name = graphnames(network_id)
     if network_id==13,   name = 'soc-sign-epinions-cc';  end
     if network_id==14,   name = 'itdk0304-cc';           end
     if network_id==15,   name = 'dblp-cc';               end
+    if network_id==16,   name = 'flickr-bidir-cc';       end
