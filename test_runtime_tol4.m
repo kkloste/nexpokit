@@ -37,9 +37,10 @@
 
 
 ntrials = 5;
-tol = 1e-4;
+tol = 1e-5;
 N = 11;
 methods = { {@(P,j) gexpm_mex(P,j,N,tol,max(1e4,30*size(P,1))), 'TSGS'}
+            {@(P,j) gexpmq_mex(P,j,N,tol,max(1e4,30*size(P,1))), 'TSGSQ'}
             {@(P,j) expv(1, P, eyei(size(P,1),j), tol, 15), 'EXPV'}
             {@(P,j) mexpv(1, P, eyei(size(P,1),j), tol, 15), 'MEXPV'}
             {@(P,j) kmatexp(P,j), 'HORNER'}};
