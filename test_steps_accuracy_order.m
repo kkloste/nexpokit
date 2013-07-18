@@ -1,4 +1,5 @@
-warning('superceded by test_steps_accuracy_order');
+
+% IGNORE THIS FUNCTION, see test_steps_accuracy.m
 rng(1); % reset the random generator
 
 ntrials = 10;
@@ -7,7 +8,8 @@ nets = [11:15];
 nsteps = 10;
 nmults = [2 5 10 15 25 50];
 
-clear record recordnn recordeffmv recordts recordtsnn
+clear record recordnn recordeffmv recordts recordtsnn ...
+    recordtau recordtaunn recordtstau recordtstaunn
 
 for network_id=nets;
     name = graphnames(network_id);
@@ -47,11 +49,13 @@ for network_id=nets;
             for ki=1:numel(topks)
                 k = min(topks(ki),n);
                 record(network_id,si,t,ki) = numel(intersect(px(1:k),pxa(1:k)))/k;
+                recordtau(network_id,si,t,ki) = corr(xapprox(px(1:k)),xtrue(px(1:k)),'type','Kendall');
             end
             
             for ki=1:numel(topks)
                 k = min(topks(ki),nleft);
                 recordnn(network_id,si,t,ki) = numel(intersect(pxnn(1:k),pxann(1:k)))/k;
+                recordtaunn(network_id,si,t,ki) = corr(xapproxnn(pxnn(1:k)),xtruenn(pxnn(1:k)),'type','Kendall');
             end
         end
         
@@ -69,13 +73,17 @@ for network_id=nets;
             for ki=1:numel(topks)
                 k = min(topks(ki),n);
                 recordts(network_id,nmi,t,ki) = numel(intersect(px(1:k),pxa(1:k)))/k;
+                recordtstau(network_id,nmi,t,ki) = corr(xapprox(px(1:k)),xtrue(px(1:k)),'type','Kendall');
             end
             
             for ki=1:numel(topks)
                 k = min(topks(ki),nleft);
                 recordtsnn(network_id,nmi,t,ki) = numel(intersect(pxnn(1:k),pxann(1:k)))/k;
+                recordtstaunn(network_id,nmi,t,ki) = corr(xapproxnn(pxnn(1:k)),xtruenn(pxnn(1:k)),'type','Kendall');
             end
         end
     end
 end
-save 'test_steps_accuracy.mat' record recordnn recordeffmv recordts recordtsnn nsteps nmults ntrials topks nets;
+save 'test_steps_accuracy.mat' record recordnn recordeffmv ...
+    recordts recordtsnn recordtau recordtaunn recordtstau recordtstaunn ....
+    nsteps nmults ntrials topks nets;

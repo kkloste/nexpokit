@@ -4,6 +4,11 @@ load test_runtime
 %%
 nmethods = numel(methods);
 loglog(record(:,1), record(:,3:(3+nmethods-1)),'.-');
+myleg = {};
+for i=1:nmethods
+    myleg{i} = methods{i}{2};
+end
+legend(myleg{:});
 
 %%
 nmethods = numel(methods);
