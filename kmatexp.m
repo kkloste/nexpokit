@@ -16,18 +16,16 @@ if nargin<3
     M = ceil(3*log(n)/log(2));
 end
 
-%y = sparse(zeros(n,1));
 y = zeros(n,1);
-y(i,1) = 1/(M+1); y = A*y;
-y(i,1) = y(i,1) + 1/M;
-
+y(i) = 1/(M+1); 
 y = A*y;
+y(i) = y(i,1) + 1/M;
+y = A*y;
+
 for k=2:M
-
-        y = y./(M+1-k);
-
-y = A*y;
-y(i,1) = y(i,1) + 1;
+	y = y./(M+1-k);
+    y = A*y;
+    y(i) = y(i) + 1;
 end
 
 

@@ -25,10 +25,11 @@
  * @param tol - the stopping tolerance (0 < tol < Inf)
  * @param maxsteps - the maximum number of steps to take (1 <= maxsteps < Inf)
  * @param y - the output vector (length n)
+ * @param nsteps - the number of output steps (length 1)
  */
 void gexpm(const mwSize n, const mwIndex* cp, const mwIndex* ari, const double* a, 
            const mwIndex c, const mwIndex N,  const double tol, const mwIndex maxsteps, 
-           double* y)
+           double* y, double *nsteps, double *npushes)
 {
     //mexPrintf("Input n=%i N=%i c=%i tol=%i maxsteps=%i\n", n, N, c, tol, maxsteps);
     mwIndex M = n*N;
@@ -56,6 +57,9 @@ void gexpm(const mwSize n, const mwIndex* cp, const mwIndex* ari, const double* 
     L[rentry(c,0)] = hsize;
     hsize++;
     heap_up(hsize-1, hsize, T, L, r);
+    
+    mwIndex npush = 0;
+    *nsteps = (double)maxsteps; // set the default, which we change on early exit
     
     //mexPrintf("Loop...\n");
     
@@ -105,6 +109,7 @@ void gexpm(const mwSize n, const mwIndex* cp, const mwIndex* ari, const double* 
                 double ajv = a[nzi];
                 y[v] += ajv*rijs;
             }
+            npush+=cp[i+1]-cp[i];
         } else {
             // this is the interior case, and so we add the column of A 
             // to the residual at the next time step.
@@ -115,22 +120,29 @@ void gexpm(const mwSize n, const mwIndex* cp, const mwIndex* ari, const double* 
                 r[re] += ajv*rijs;
                 sumresid += ajv*rijs;
                 
-                if (L[rentry(v,j+1)] > M) { // then this is a new heap entry
-                    T[hsize] = re;
-                    L[re] = hsize;
-                    hsize ++;
+                if (r[re] > tol/n) {
+                    if (L[rentry(v,j+1)] > M) { // then this is a new heap entry
+                        T[hsize] = re;
+                        L[re] = hsize;
+                        hsize ++;
+                    }
+                    mwIndex k = L[re];
+                    k = heap_down(k, hsize, T, L, r);
+                    heap_up(k, hsize, T, L, r);
                 }
-                mwIndex k = L[re];
-                k = heap_down(k, hsize, T, L, r);
-                heap_up(k, hsize, T, L, r);
             }
+            npush+=cp[i+1]-cp[i];
         }
         
         
         if (sumresid < tol) {
+            *nsteps = (double)iter;
             break;
         }
     }
+    
+    *npushes = (double)npush;
+    
     return; // because we "break" out of for loop
 }
 
@@ -153,6 +165,8 @@ void mexFunction(
     
     mwSize n = mxGetM(A);
     pargout[0] = mxCreateDoubleMatrix(n,1,mxREAL);
+    pargout[1] = mxCreateDoubleMatrix(1,1,mxREAL);
+    pargout[2] = mxCreateDoubleMatrix(1,1,mxREAL);
     
     // decode the sparse matrix
     mwIndex* cp = mxGetJc(A);
@@ -160,6 +174,8 @@ void mexFunction(
     double* a = mxGetPr(A);
     
     double* y = mxGetPr(pargout[0]);
+    double* nsteps = mxGetPr(pargout[1]);
+    double* npushes = mxGetPr(pargout[2]);
     
     // mexPrintf("Starting call \n");
     
@@ -170,7 +186,7 @@ void mexFunction(
     
     gexpm(n, cp, ri, a, // sparse matrix
           c, N, tol, maxsteps, // parameters
-          y);
+          y, nsteps, npushes);
     
 }
     
