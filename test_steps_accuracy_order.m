@@ -1,15 +1,15 @@
 
-% IGNORE THIS FUNCTION, see test_steps_accuracy.m
 rng(1); % reset the random generator
 
-ntrials = 10;
+ntrials = 25;
 topks = [10,25,100,1000];
-nets = [11:15];
+nets = [11:16];
 nsteps = 10;
 nmults = [2 5 10 15 25 50];
+storetols = [1e-4 1e-5];
 
 clear record recordnn recordeffmv recordts recordtsnn ...
-    recordtau recordtaunn recordtstau recordtstaunn
+    recordtau recordtaunn recordtstau recordtstaunn recordstol
 
 for network_id=nets;
     name = graphnames(network_id);
@@ -17,8 +17,27 @@ for network_id=nets;
     P = sparse(normout(A)');
     n = size(P,1);
     %p = randperm(n); % generate a random list of nodes
-    [~,p] = sort(sum(A,2),'descend');
-    p(1:100) = []; % remove the first 100 nodes of highest degree
+    % Pick nodes propotional to their degree by using miniverts on the
+    % edges.
+    [~,miniverts] = find(A);
+    % each vertex appears in miniverts with the probability of its degree
+    % so we want a random set of miniverts
+    pmv = randperm(numel(miniverts));
+    p = zeros(ntrials,1);
+    pickedverts = zeros(n,1);
+    curmv = 1;
+    for i=1:ntrials
+        while p(i) == 0
+            if curmv > nnz(A)
+                error('could not find enough verts!');
+            end
+            v = miniverts(pmv(curmv));
+            curmv = curmv + 1;
+            if pickedverts(v), continue; end
+            p(i) = v;
+            pickedverts(v) = 1;
+        end
+    end
     maxsteps = ceil(logspace(2,log10(10*n),nsteps));
     tols = logspace(-2,-8,nsteps);
     
@@ -33,10 +52,17 @@ for network_id=nets;
         [~,pxnn] = sort(xtruenn,'descend');
         nleft = sum(isfinite(xtruenn));
         
+        for ti=1:numel(storetols)
+            [~,~,npushest] = gexpmq_mex(P,j,11,storetols(ti),50*n);
+            recordstol(network_id,ti,t) = npushest/nnz(A);
+        end
+        
         for si=1:nsteps
             ns = maxsteps(si);
-            tol = tols(si);
+            tol = tols(si);            
             [xapprox asteps npushes] = gexpmq_mex(P,j,11,tol,ns);
+            
+            
             
             [~,pxa] = sort(xapprox,'descend');
             xapproxnn = xapprox;
@@ -85,5 +111,6 @@ for network_id=nets;
     end
 end
 save 'test_steps_accuracy.mat' record recordnn recordeffmv ...
-    recordts recordtsnn recordtau recordtaunn recordtstau recordtstaunn ....
-    nsteps nmults ntrials topks nets;
+    recordts recordtsnn recordtau recordtaunn recordtstau recordtstaunn ...
+    recordstol ...
+    nsteps nmults ntrials topks nets storetols;

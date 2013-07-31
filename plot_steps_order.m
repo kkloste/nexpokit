@@ -1,8 +1,8 @@
 data = load('test_steps_accuracy');
 
 %%
-t=10;
-ni=data.nets(5);
+t=4;
+ni=data.nets(3);
 
 
 clf; hold all;

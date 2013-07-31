@@ -18,6 +18,8 @@ xlabel('log10 of residual tolerance');
 ylabel(sprintf('Precision at %i', data.topks(ki)));
 box off;
 
+title(graphnames(ni));
+
 %%
 set_figure_size([3,3]);
 print(gcf,sprintf('figures/tol-accuracy-%s-%i-nn.eps', graphnames(ni), data.topks(ki)), '-depsc2');
