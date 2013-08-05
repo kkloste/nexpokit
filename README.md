@@ -1,3 +1,9 @@
+---
+title: "Network Matrix Exponentials for link-prediction, centrality, and more"
+layout: project
+---
+
+
 NEXPOKIT: Network Matrix Exponentials for link-prediction, centrality, and more
 ===============================================================================
 
@@ -5,6 +11,11 @@ NEXPOKIT: Network Matrix Exponentials for link-prediction, centrality, and more
 ### David F. Gleich
 
 _These are research codes and may not work for you._
+
+Download
+--------
+
+* [nexpokit.tar.gz](nexpokit.tar.gz) (2013-08-05)
 
 Synopsis
 --------
