@@ -25,10 +25,11 @@
  * @param tol - the stopping tolerance (0 < tol < Inf)
  * @param maxsteps - the maximum number of steps to take (1 <= maxsteps < Inf)
  * @param y - the output vector (length n)
+ * @param nsteps - the number of output steps (length 1)
  */
 void gexpm(const mwSize n, const mwIndex* cp, const mwIndex* ari, const double* a, 
            const mwIndex c, const mwIndex N,  const double tol, const mwIndex maxsteps, 
-           double* y)
+           double* y, double *nsteps, double *npushes)
 {
     //mexPrintf("Input n=%i N=%i c=%i tol=%i maxsteps=%i\n", n, N, c, tol, maxsteps);
     mwIndex M = n*N;
@@ -57,6 +58,12 @@ void gexpm(const mwSize n, const mwIndex* cp, const mwIndex* ari, const double* 
     hsize++;
     heap_up(hsize-1, hsize, T, L, r);
     
+    mwIndex npush = 0;
+    mwIndex i,j,v,re,k,ri;
+    double rijs, rij, ajv;
+    double tolnN = tol/(n*N);
+    *nsteps = (double)maxsteps; // set the default, which we change on early exit
+    
     //mexPrintf("Loop...\n");
     
     for (mwIndex iter = 0; iter < maxsteps; ++iter) {
@@ -74,7 +81,7 @@ void gexpm(const mwSize n, const mwIndex* cp, const mwIndex* ari, const double* 
         */
         
         // STEP 1: pop top element off of heap
-        mwIndex ri = T[0];
+        ri = T[0];
         T[0] = T[hsize-1];
         L[T[0]] = 0;
         L[ri] = M+1; /* the null location, the order here is important! */
@@ -84,10 +91,10 @@ void gexpm(const mwSize n, const mwIndex* cp, const mwIndex* ari, const double* 
         heap_down(0, hsize, T, L, r);
         
         // decode incides i,j
-        mwIndex i = ri%n;
-        mwIndex j = ri/n;
+        i = ri%n;
+        j = ri/n;
         
-        double rij = r[ri];
+        rij = r[ri];
         
         // update yi
         y[i] += rij;
@@ -95,42 +102,50 @@ void gexpm(const mwSize n, const mwIndex* cp, const mwIndex* ari, const double* 
         // update r, no need to update heap here 
         r[ri] = 0;
         sumresid -= rij;
-        double rijs = rij/(double)(j+1);
+        rijs = rij/(double)(j+1);
         
         if (j == N-1) {
             // this is the terminal case, and so we add the column of A 
             // directly to the solution vector y
             for (mwIndex nzi=cp[i]; nzi < cp[i+1]; ++nzi) {
-                mwIndex v = ari[nzi];
-                double ajv = a[nzi];
+                v = ari[nzi];
+                ajv = a[nzi];
                 y[v] += ajv*rijs;
             }
+//            npush+=cp[i+1]-cp[i];
         } else {
             // this is the interior case, and so we add the column of A 
             // to the residual at the next time step.
             for (mwIndex nzi=cp[i]; nzi < cp[i+1]; ++nzi) {
-                mwIndex v = ari[nzi];
-                double ajv = a[nzi];
-                mwIndex re = rentry(v,j+1);
+                v = ari[nzi];
+                ajv = a[nzi];
+                re = rentry(v,j+1);
                 r[re] += ajv*rijs;
                 sumresid += ajv*rijs;
                 
-                if (L[rentry(v,j+1)] > M) { // then this is a new heap entry
-                    T[hsize] = re;
-                    L[re] = hsize;
-                    hsize ++;
+                if (r[re] > tolnN) {
+                    if (L[rentry(v,j+1)] > M) { // then this is a new heap entry
+                        T[hsize] = re;
+                        L[re] = hsize;
+                        hsize ++;
+                    }
+                    k = L[re];
+                    k = heap_down(k, hsize, T, L, r);
+                    heap_up(k, hsize, T, L, r);
                 }
-                mwIndex k = L[re];
-                k = heap_down(k, hsize, T, L, r);
-                heap_up(k, hsize, T, L, r);
             }
+//            npush+=cp[i+1]-cp[i];
         }
         
         
         if (sumresid < tol) {
+            *nsteps = (double)iter;
             break;
         }
     }
+    
+    *npushes = (double)npush;
+    
     return; // because we "break" out of for loop
 }
 
@@ -153,24 +168,29 @@ void mexFunction(
     
     mwSize n = mxGetM(A);
     pargout[0] = mxCreateDoubleMatrix(n,1,mxREAL);
+    pargout[1] = mxCreateDoubleMatrix(1,1,mxREAL);
+    pargout[2] = mxCreateDoubleMatrix(1,1,mxREAL);
     
     // decode the sparse matrix
+
     mwIndex* cp = mxGetJc(A);
     mwIndex* ri = mxGetIr(A);
     double* a = mxGetPr(A);
     
     double* y = mxGetPr(pargout[0]);
+    double* nsteps = mxGetPr(pargout[1]);
+    double* npushes = mxGetPr(pargout[2]);
     
     // mexPrintf("Starting call \n");
     
     mxAssert(N > 0, "N must be bigger than 0");
     mxAssert(tol > 0 && tol <= 1, "tol must be 0 < tol <= 1");
     mxAssert(c >= 0 && c < n, "column c must be 1 <= c <= n");
-    mxAssert(maxsteps > 0, "we must have maxsteps >= 0");
+    mxAssert(maxsteps > 0, "must have maxsteps >= 0");
     
     gexpm(n, cp, ri, a, // sparse matrix
           c, N, tol, maxsteps, // parameters
-          y);
+          y, nsteps, npushes);
     
 }
     
