@@ -1,16 +1,14 @@
 /** 
- * @file gsqres_mex.cpp
+ * @file gexpm_mex.cpp
  * @author Kyle Kloster, David F. Gleich
  */
 
 /**
- *  This improves on gexpmq_mex by scaling block-k of the residual
- *  by psi_k(t) for all k -- gexpmq simply ran until every entry
- *  of the residual  satisfied r(i,j) < tol/(n*N). Instead, this
- *  runs until entries in r(:,j) are < tol/(n*psivec[j]), which
- *  saves some computation and is more easily adapted to e^(tP)
- *  (whereas t=1 must be the case for gexpmq)
+ * This file implements a gauss-southwell type method for the truncated 
+ * taylor series approximation for a column of the matrix exponential
  */
+
+
 
 #include <vector>
 #include <queue>
@@ -20,18 +18,10 @@
 #include <algorithm>
 #include <math.h>
 
-#ifdef __APPLE__
-#include <tr1/unordered_set>
-#include <tr1/unordered_map>
-#define tr1ns std::tr1
-#else
-#include <unordered_set>
-#include <unordered_map>
-#define __STDC_UTF_16__ 1
-#define tr1ns std
-#endif
+#include "sparseheap.hpp" // include our heap functions
 
-#include <mex.h>
+#include "mex.h"
+
 
 #define DEBUGPRINT(x) do { if (debugflag) { \
 mexPrintf x; mexEvalString("drawnow"); } \
@@ -78,21 +68,6 @@ struct sparsevec {
     }
 };
 
-struct sparserow {
-    mwSize n, m;
-    mwIndex *ai;
-    mwIndex *aj;
-    double *a;
-};
-
-
-/**
- * Returns the degree of node u in sparse graph s
- */
-mwIndex sr_degree(sparserow *s, mwIndex u) {
-    return (s->ai[u+1] - s->ai[u]);
-}
-
 
 /**
  * Computes the degree N for the Taylor polynomial
@@ -113,129 +88,131 @@ unsigned int taylordegree(const double t, const double eps) {
     return std::max((int)k, (int)1);
 }
 
-/*****
- *
- *          above:  DATA STRUCTURES
- *
- *
- *
- *          below:  EXPM FUNCTION
- *
- ****/
+
+struct sparserow {
+    mwSize n, m;
+    mwIndex *ai;
+    mwIndex *aj;
+    double *a;
+};
+
 
 /**
- *
- *  gsqexpmseed inputs:
- *      G   -   adjacency matrix of an undirected graph
- *      set -   seed vector: the indices of a seed set of vertices
- *              around which cluster forms; normalized so
- *                  set[i] = 1/set.size(); )
- *  output:
- *      y = exp(tP) * set
- *              with relative 1-norm error of eps
- *  parameters:
- *      t   - the value of t
- *      eps - the accuracy
+ * Returns the degree of node u in sparse graph s
  */
-void gexpmq(sparserow* G, std::vector<mwIndex>& set, sparsevec& y,
-                const double t, const double eps, double* npush)
-{
+mwIndex sr_degree(sparserow *s, mwIndex u) {
+    return (s->ai[u+1] - s->ai[u]);
+}
+
+
 /**
- *      PREPROCESSING:
- *          allocation of data,
- *          computation of N and psi
+ * @param n - sparse matrix size
+ * @param cp - sparse matrix column pointer (CSC)
+ * @param ari - sparse matrix row index (CSC)
+ * @param a - sparse matrix values (CSC)
+ * @param c - the column index to approximate (0 <= c < n)
+ * @param N - the number of steps (1 <= N < Inf)
+ * @param tol - the stopping tolerance (0 < tol < Inf)
+ * @param maxsteps - the maximum number of steps to take (1 <= maxsteps < Inf)
+ * @param y - the output vector (length n)
+ * @param nsteps - the number of output steps (length 1)
  */
-    DEBUGPRINT(("gsqres interior: t=%f eps=%f \n", t, eps));
+
+void gexpm(sparserow* G, std::vector<mwIndex>& set, sparsevec& y,
+           const double t, const double eps,
+           double* npushes, double* nsteps, const mwIndex maxsteps)
+{
+    mwIndex N = taylordegree(t,eps);
     mwIndex n = G->n;
-    mwIndex N = taylordegree(t, eps);
-    DEBUGPRINT(("gsqres: n=%i N=%i \n", n, N));
+
+    DEBUGPRINT( ("Input n=%i N=%i tol=%f maxsteps=%i\n", n, N, eps, maxsteps) );
     
-    // initialize the weights for the different residual partitions
-    // r(i,j) < exp(t)*eps/(n*N*psi_j(t))
-    //  into the vector "pushcoeff"
     std::vector<double> psivec(N+1,0.);
     psivec[N] = 1;
-    for (int k = 1; k <= N ; k++){
+    for (mwIndex k = 1; k <= N ; k++){
         psivec[N-k] = psivec[N-k+1]*t/(double)(N-k+1) + 1;
-    } // psivec[k] = psi_k(t)
-    std::vector<double> pushcoeff(N+1,0.);
-    pushcoeff[0] = (((exp(t)/(double)n)*eps)/(double)N)/psivec[0];
-    // This is a more numerically stable way to compute
-    //      pushcoeff[j] = exp(t)*eps/(n*N*psivec[j])
-    for (int k = 1; k <= N ; k++){
-        pushcoeff[k] = pushcoeff[k-1]*(psivec[k-1]/psivec[k]);
-    }
+    } // now psivec[k] = psi_k(t)
+    
 
 /**
- *      END PREPROCESSING
+ *  prepare the RESIDUAL heap
  */
-    
-    mwIndex ri = 0;
-    double rij = 0;
-    sparsevec rvec;
-    
     // i is the node index, j is the "step"
 #define rentry(i,j) ((i)+(j)*n)
-    std::queue<mwIndex> Q;
-    // set the initial residual, add to the queue
+    double sumresid = 0.;
+    mwIndex ri;
+    double rij = 0.;
+    sparsemaxheap r;
+    r.hsize=0;
+
+     // set the initial residual
     for (size_t i=0; i<set.size(); ++i) {
         ri = set[i];
-        //rij = value in entry ri of the input vector
         rij = 1.;
-        rvec.map[rentry(ri,0)]+=rij;
-        Q.push(rentry(ri,0));
+        sumresid += rij;
+        r.update(rentry(ri,0),rij); // "update" handles the heap as well
     }
-    
-//    while (npush < max_push_count) {
-    while (1) {
+    DEBUGPRINT(("gexpm_hash: hsize = %i \n", r.hsize));
+    *npushes = 0;
+        DEBUGPRINT(("gexpm_hash: enter for loop \n"));
+    for (mwIndex iter = 0; iter < maxsteps; ++iter) {
+        /* STEP 1: pop top element off of heap
+         *  * get indices i,j from T
+         *  * add r(i,j) to y(i)
+         *  * set r(i,j) to zero (update sumresid)
+         * STEP 2: get i^th column from A
+         *  * get neighbors of ith node
+         *  * (if j == N-1), add the column to y instead of r.
+         *  * add as a column to next time-step of r, and update heap
+         *  *  (update sumresid)
+         * Check for convegence!
+        */
+        
         // STEP 1: pop top element off of heap
-        ri = Q.front();
-        Q.pop();
+        // "extractmax" sets the entry to 0, stores the value in rij,
+        // the index in ri, removes the entry from the heap, then reheaps.
+        ri = r.extractmax(rij);
+        sumresid -= rij;
+DEBUGPRINT(("gexpm_hash: hsize = %i , iter = %i,  sumresid = %.8f,  rij = %.8f \n", r.hsize, iter, sumresid, rij));
         // decode incides i,j
         mwIndex i = ri%n;
         mwIndex j = ri/n;
-        
-        double degofi = (double)sr_degree(G,i);
-        rij = rvec.map[ri];
-        
+
         // update yi
         y.map[i] += rij;
-        
-        // update r, no need to update heap here
-        rvec.map[ri] = 0;
-        
+
+        double degofi = (double)sr_degree(G,i);
         double rijs = t*rij/(double)(j+1);
         double ajv = 1./degofi;
         double update = rijs*ajv;
         
         if (j == N-1) {
-            // this is the terminal case, and so we add the column of A
+            // this is the terminal case, and so we add the column of A 
             // directly to the solution vector y
-            for (mwIndex nzi=G->ai[i]; nzi < G->ai[i+1]; ++nzi) {
+            for (mwIndex nzi=G->ai[i]; nzi < G->ai[i+1]; ++nzi){
                 mwIndex v = G->aj[nzi];
-                y.map[v] += update;
+                y.map[v] += update; // in general case, update = ajv*rijs
             }
-            *npush += degofi;
-        }
-        else {
-            // this is the interior case, and so we add the column of A
+            *npushes += degofi;
+        } else {
+            // this is the interior case, and so we add the column of A 
             // to the residual at the next time step.
             for (mwIndex nzi=G->ai[i]; nzi < G->ai[i+1]; ++nzi) {
                 mwIndex v = G->aj[nzi];
                 mwIndex re = rentry(v,j+1);
-                double reold = rvec.get(re);
-                double renew = reold + update;
-                rvec.map[re] = renew;
-                if (renew >= pushcoeff[j+1] && reold < pushcoeff[j+1]) {
-                    Q.push(re);
-                }
+                r.update(re,update); // handles the heap internally
+                //                r[re] += ajv*rijs;
+                sumresid += update;
             }
-            *npush += degofi;
+            *npushes += degofi;
         }
-        // terminate when Q is empty, i.e. we've pushed all r(i,j) > exp(t)*eps*/(N*n*psi_j(t))
-        if ( Q.size() == 0) { return; }
-    }//end 'while'
-    return;
+        if (sumresid < eps/exp(t) || r.hsize == 0) {
+            DEBUGPRINT(("gexpm_hash: BREAK: hsize = %i , iter = %i,  sumresid = %.8f,  rij = %.8f \n", r.hsize, iter, sumresid, rij));
+            *nsteps = (double)iter;
+            break;
+        }
+    }
+    return; // because we "break" out of for loop
 }
 
 
@@ -256,18 +233,18 @@ void copy_array_to_index_vector(const mxArray* v, std::vector<mwIndex>& vec)
 
 
 // USAGE
-// [y npushes] = gsqres_mex(A,set,eps,t,debugflag)
+// [y npushes nsteps] = gexpm_hash_mex(A,set,eps,t,debugflag,maxsteps)
 void mexFunction(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])
 {
     if (nrhs < 2 || nrhs > 5) {
-        mexErrMsgIdAndTxt("gsqres_mex:wrongNumberArguments",
-                          "gsqres_mex needs two to five arguments, not %i", nrhs);
+        mexErrMsgIdAndTxt("gexpm_hash_mex:wrongNumberArguments",
+                          "gexpm_hash_mex needs two to five arguments, not %i", nrhs);
     }
-    mxAssert(nlhs <= 2, "Too many output arguments");
+    mxAssert(nlhs <= 3, "Too many output arguments");
     if (nrhs == 5) {
         debugflag = (int)mxGetScalar(prhs[4]);
     }
-    DEBUGPRINT(("gsqres_mex: preprocessing start: \n"));
+    DEBUGPRINT(("\n gexpm_hash_mex: preprocessing start: \n"));
     
     const mxArray* mat = prhs[0];
     const mxArray* set = prhs[1];
@@ -275,15 +252,20 @@ void mexFunction(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])
     mxAssert(mxIsSparse(mat), "Input matrix is not sparse");
     mxAssert(mxGetM(mat) == mxGetN(mat), "Input matrix not square");
     
-    double* npushes;
+    double* npushes = 0;
+    double* nsteps = 0;
     if (nlhs > 1){
         plhs[1] = mxCreateDoubleMatrix(1,1,mxREAL);
         npushes = mxGetPr(plhs[1]);
     }
+    if (nlhs > 2){
+        plhs[2] = mxCreateDoubleMatrix(1,1,mxREAL);
+        nsteps = mxGetPr(plhs[2]);
+    }
     
     double eps = pow(10,-5);
     double t = 1.;
-
+    
     if (nrhs >= 4) { t = mxGetScalar(prhs[3]); }
     if (nrhs >= 3) { eps = mxGetScalar(prhs[2]); }
     
@@ -293,17 +275,22 @@ void mexFunction(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])
     G.ai = mxGetJc(mat);
     G.aj = mxGetIr(mat);
     G.a = mxGetPr(mat);
-    
+
+    mwIndex maxsteps = G.n;
+    if (nrhs >= 6){
+        maxsteps = (mwIndex)mxGetScalar(prhs[5]);
+    }
+
     std::vector< mwIndex > seeds;
     copy_array_to_index_vector( set, seeds );
     sparsevec hk;
     
-    DEBUGPRINT(("gsqres_mex: preprocessing end: \n"));
+    DEBUGPRINT(("gexpm_hash_mex: preprocessing end: \n"));
     
-    gexpmq(&G, seeds, hk, t, eps, npushes);
-
-    DEBUGPRINT(("gsqres_mex: call to gsqres() done\n"));
-
+    gexpm(&G, seeds, hk, t, eps, npushes, nsteps, maxsteps);
+    
+    DEBUGPRINT(("gexpm_hash_mex: call to gexpm_hash() done\n"));
+    
     if (nlhs > 0) { // sets output "hk" to the heat kernel vector computed
         mxArray* hkvec = mxCreateDoubleMatrix(G.n,1,mxREAL);
         plhs[0] = hkvec;
