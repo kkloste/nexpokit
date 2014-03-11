@@ -196,10 +196,22 @@ void mexFunction(
     
     // mexPrintf("Starting call \n");
     
-    mxAssert(N > 0, "N must be bigger than 0");
-    mxAssert(tol > 0 && tol <= 1, "tol must be 0 < tol <= 1");
-    mxAssert(c >= 0 && c < n, "column c must be 1 <= c <= n");
-    mxAssert(maxsteps > 0, "must have maxsteps >= 0");
+    if ( N <= 0 ){
+        mexErrMsgIdAndTxt("gexpm_mex:wrongInputParamterN",
+                          "gexpm_mex needs N > 0");
+    }
+    if ( tol <= 0 || tol > 1){
+        mexErrMsgIdAndTxt("gexpm_mex:wrongInputParamterTol",
+                          "gexpm_mex needs 0 < tol <= 1");
+    }
+    if ( c < 0 || c >= n ){
+        mexErrMsgIdAndTxt("gexpm_mex:wrongInputParamterC",
+                          "gexpm_mex needs 1 <= c <= n");
+    }
+    if ( maxsteps <= 0 ){
+        mexErrMsgIdAndTxt("gexpm_mex:wrongInputParamterN",
+                          "gexpm_mex needs maxsteps > 0");
+    }
     
     gexpm(n, cp, ri, a, // sparse matrix
           c, N, tol, maxsteps, // parameters

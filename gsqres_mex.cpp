@@ -263,7 +263,11 @@ void mexFunction(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])
         mexErrMsgIdAndTxt("gsqres_mex:wrongNumberArguments",
                           "gsqres_mex needs two to five arguments, not %i", nrhs);
     }
-    mxAssert(nlhs <= 2, "Too many output arguments");
+    if ( nlhs > 2 ){
+        mexErrMsgIdAndTxt("gsqres_mex:wrongNumberOutputs",
+                          "gsqres_mex needs two outputs, not %i", nlhs);
+    }
+    
     if (nrhs == 5) {
         debugflag = (int)mxGetScalar(prhs[4]);
     }
@@ -272,8 +276,14 @@ void mexFunction(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])
     const mxArray* mat = prhs[0];
     const mxArray* set = prhs[1];
     
-    mxAssert(mxIsSparse(mat), "Input matrix is not sparse");
-    mxAssert(mxGetM(mat) == mxGetN(mat), "Input matrix not square");
+    if ( mxIsSparse(mat) == false ){
+        mexErrMsgIdAndTxt("gsqres_mex:wrongInputMatrix",
+                          "gsqres_mex needs sparse input matrix");
+    }
+    if ( mxGetM(mat) != mxGetN(mat) ){
+        mexErrMsgIdAndTxt("gsqres_mex:wrongInputMatrixDimensions",
+                          "gsqres_mex needs square input matrix");
+    }
     
     double* npushes;
     if (nlhs > 1){

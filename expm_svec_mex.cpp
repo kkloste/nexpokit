@@ -193,6 +193,7 @@ void expm_svec(sparserow* G, std::vector<mwIndex>& set, sparsevec& y,
         y.map[ri] = rij;
     }
     
+    mwIndex oldhsize = 0;
     sparsevec dummy; // dummy temporarily holds A*y
     //    tree_map T;
     std::vector<mwIndex> Tvec(maxnnz,0);
@@ -203,7 +204,25 @@ void expm_svec(sparserow* G, std::vector<mwIndex>& set, sparsevec& y,
     // HORNER'S RULE ITERATES
     for (mwIndex k=0; k <= N-1 ; k++){
         mwIndex hsize = 0;
-        // for each entry of y, check if we put it in the heap
+
+        // (1) MAKE HEAP
+        //      For each entry of y, check if we put it in the heap.
+        //      Start by seeing if any of the entries from the last heap
+        //      go into this one -- loading the biggest entries in first
+        //      will minimize the number of heap updates made
+        for (mwIndex hind = 0; hind < oldhsize ; hind++){
+            mwIndex ind = T[hind];
+            double valind = y.get(ind);
+            // if the value is nonzero, we might add it to heap
+            if (valind > 0) {
+                // place y[ind] at back of heap, then heap_up
+                T[hsize] = ind;
+                d[hsize] = valind;
+                hsize++;
+                heap_up(hsize-1, hsize, T, d);
+            }
+            y.map.erase(ind);
+        }
         for (map_type::iterator it=y.map.begin(),itend=y.map.end();it!=itend;++it) {
             mwIndex ind = it->first;
             double valind = it->second;
@@ -232,21 +251,14 @@ void expm_svec(sparserow* G, std::vector<mwIndex>& set, sparsevec& y,
             }
         }// END FOR
         
-        // Copy the nonzeros in the heap of y into dummy
-        // and zero out y, so it can be set equal to
-        // the matvec y = A*dummy
-        /*        for (mwIndex it = 0; it < hsize ; it++){
-         mwIndex Tind = T[it];
-         V[it] = d[it]; // y.map[Tind];
-         }*/
         
         y.map.clear();
         
-        // At this point, y[] = 0 entirely, and dummy contains
+        // At this point, y[] = 0 entirely, and d[] contains
         // just the entries from y that survived the heap process,
         // i.e. the maxnnz largest entries that were in y.
         
-        // ACTUAL MATVEC
+        // (2) ACTUAL MATVEC
         for (mwIndex it = 0; it < hsize ; it++){
             mwIndex Tind = T[it];
             double Nk = (double)N-k;
@@ -258,6 +270,7 @@ void expm_svec(sparserow* G, std::vector<mwIndex>& set, sparsevec& y,
                 y.map[v] = y.get(v) + update;
             }
         }
+        
         // add y += set
         for (size_t i=0; i<set.size(); ++i) {
             mwIndex ri = set[i];
@@ -265,7 +278,7 @@ void expm_svec(sparserow* G, std::vector<mwIndex>& set, sparsevec& y,
             y.map[ri] = y.get(ri) + rij;
         }
         *npushes += set.size();
-        
+        oldhsize = hsize;
     }//terms of Taylor are complete
     return;
 }
@@ -303,8 +316,14 @@ void mexFunction(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])
     const mxArray* mat = prhs[0];
     const mxArray* set = prhs[1];
     
-    mxAssert(mxIsSparse(mat), "Input matrix is not sparse");
-    mxAssert(mxGetM(mat) == mxGetN(mat), "Input matrix not square");
+    if ( mxIsSparse(mat) == false ){
+        mexErrMsgIdAndTxt("expm_svec_mex:wrongInputMatrix",
+                          "expm_svec_mex needs sparse input matrix");
+    }
+    if ( mxGetM(mat) != mxGetN(mat) ){
+        mexErrMsgIdAndTxt("expm_svec_mex:wrongInputMatrixDimensions",
+                          "expm_svec_mex needs square input matrix");
+    }
 
     sparserow G;
     G.m = mxGetM(mat);
@@ -329,6 +348,19 @@ void mexFunction(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])
     if (nrhs >= 5) { maxnnz = (mwIndex)mxGetScalar(prhs[4]);}
     if (nrhs >= 4) { t = mxGetScalar(prhs[3]); }
     if (nrhs >= 3) { eps = mxGetScalar(prhs[2]); }
+    if ( maxnnz > G.n || maxnnz <= 0 ){
+        mexErrMsgIdAndTxt("expm_svec_mex:wrongParameterMaxnnz",
+                          "expm_svec_mex needs 1 <= maxnnz <= n ");
+    }
+    if ( t <= 0 ){
+        mexErrMsgIdAndTxt("expm_svec_mex:wrongParameterT",
+                          "expm_svec_mex needs 0 < t ");
+    }
+
+    if ( eps <= 0 || eps >= 1){
+        mexErrMsgIdAndTxt("expm_svec_mex:wrongParameterEps",
+                          "expm_svec_mex needs 0 < eps < 1 ");
+    }
     
     std::vector< mwIndex > seeds;
     copy_array_to_index_vector( set, seeds );

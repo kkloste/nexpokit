@@ -33,24 +33,44 @@
 #include <math.h>
 #include "minheapnoL.hpp" // include our heap functions
 
+
+/**
+ * Computes the degree N for the Taylor polynomial
+ * of exp(tP) to have error less than eps*exp(t)
+ *
+ * ( so exp(-t(I-P)) has error less than eps )
+ */
+unsigned int taylordegree(const double t, const double eps) {
+    double eps_exp_t = eps*exp(t);
+    double error = exp(t)-1;
+    double last = 1.;
+    double k = 0.;
+    while(error > eps_exp_t){
+        k = k + 1.;
+        last = (last*t)/k;
+        error = error - last;
+    }
+    return std::max((int)k, (int)1);
+}
+
 /**
  * @param n - sparse matrix size
  * @param cp - sparse matrix column pointer (CSC)
  * @param ari - sparse matrix row index (CSC)
  * @param a - sparse matrix values (CSC)
  * @param c - column index
- * @param N - number of terms of Taylor polynomial
  * @param maxnnz - the maximum number of nnz from input vec to use (1 <= maxnnz <= n)
  * @param y - the output vector (length n)
  */
 
 void hpexpm(const mwSize n, const mwIndex* cp, const mwIndex* ari, const double* a, 
-           const mwIndex c, const double N, const mwIndex maxnnz, double* y)
+           const mwIndex c, const double eps, const double t, const mwIndex maxnnz, double* y)
 {
     // Note: N is taken to be of type "double" because
     // it's used in computations below as type "double".
     
-    mwSize maxlistsize = (mwSize)ceil(100*sqrt(n)*log(maxnnz)/log(10));
+    mwIndex N = taylordegree(t,eps);
+    mwSize maxlistsize = n;//std::max( (mwIndex)ceil(n/4), (mwSize)ceil(100*sqrt(n)*log(maxnnz)/log(10)) );
 	double valind,minval;
     mwIndex hsize = 0;
     mwIndex ind, Tind, ri, arinzi, listind, Nk, nzi;
@@ -176,6 +196,7 @@ void hpexpm(const mwSize n, const mwIndex* cp, const mwIndex* ari, const double*
 return;
 }
 
+// USAGE  y = hpexpm_mex(A,c,eps,t,maxnnz)
 void mexFunction(
   int nargout, mxArray *pargout[],       // these are your outputs
   int nargin, const mxArray *pargin[])   // these are your arguments
@@ -183,14 +204,30 @@ void mexFunction(
     // inputs
     // A - sparse n-by-n
     // c - positive integer, the column index of exp(A) to be computed
-    // N - positive integer, number of terms of Taylor series used
+    // eps - accuracy desired
+    // t - scalar, e^(tA)
     // maxnnz - integer scalar max number of entries to use in the matvecs 
     
     const mxArray* A = pargin[0];
-    mwIndex c = (mwIndex)mxGetScalar(pargin[1])-1;
-    double N = (double)mxGetScalar(pargin[2]);
-    mwIndex maxnnz = (mwIndex)mxGetScalar(pargin[3]);
+    if ( mxIsSparse(A) == false ){
+        mexErrMsgIdAndTxt("hpexpm_mex:wrongInputMatrix",
+                          "hpexpm_mex needs sparse input matrix");
+    }
+    if ( mxGetM(A) != mxGetN(A) ){
+        mexErrMsgIdAndTxt("hpexpm_mex:wrongInputMatrixDimensions",
+                          "hpexpm_mex needs square input matrix");
+    }
+    
     mwSize n = mxGetM(A);
+    mwIndex c = (mwIndex)mxGetScalar(pargin[1])-1;
+
+    double eps = 1e-4;
+    double t = 1.;
+    mwIndex maxnnz = std::min((mwIndex)1000,n);
+    if (nargin >= 3){ eps = mxGetScalar(pargin[2]); }
+    if (nargin >= 4){ t = mxGetScalar(pargin[3]); }
+    if (nargin >= 5){ maxnnz = (mwIndex)mxGetScalar(pargin[4]); }
+
 	
     pargout[0] = mxCreateDoubleMatrix(n,1,mxREAL);
     
@@ -202,12 +239,23 @@ void mexFunction(
     double* y = mxGetPr(pargout[0]);
     
     // mexPrintf("Starting call \n");
-    mxAssert( nargin == 5, "incorrect number of inputs");
-    mxAssert( N > 0, "N must be bigger than 0");
-	mxAssert( 0 <= c &&  c < n, "c must be 1 <= c <= n");
+
     mxAssert( 1 <= maxnnz && maxnnz <= n, "we must have 1 <= maxnnz <= n");
+    if ( nargin != 3 ){
+        mexErrMsgIdAndTxt("hpexpm_mex:wrongNumberInputs",
+                          "hpexpm_mex needs 3 inputs");
+    }
+    if ( c < 0 || c >= n ){
+        mexErrMsgIdAndTxt("hpexpm_mex:wrongParamterC",
+                          "hpexpm_mex needs 1 <= c <= n");
+    }
+    if ( maxnnz <= n || maxnnz >= 1 ){
+        mexErrMsgIdAndTxt("hpexpm_mex:wrongParamterMaxnnz",
+                          "hpexpm_mex needs 1 <= maxnnz <= n");
+    }
+
     
     hpexpm(n, cp, ri, a, // sparse matrix
-          c, N, maxnnz, // parameters
+          c, eps, t, maxnnz, // parameters
           y); // output product vector   
 }
