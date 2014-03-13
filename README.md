@@ -3,9 +3,12 @@ title: "Network Matrix Exponentials for link-prediction, centrality, and more"
 layout: project
 ---
 
+NEXPOKIT
+========
 
-NEXPOKIT: Network Matrix Exponentials for link-prediction, centrality, and more
-===============================================================================
+Network Matrix Exponentials for link-prediction, centrality, and more
+
+
 
 ### Kyle Kloster
 ### David F. Gleich
@@ -61,12 +64,4 @@ To reproduce figure 3, run
     plot_runtime
     
     
-        
-
-Todo
-----
-
-1. Finish the readme
-2. Implement the experiments
-3. Mex the code
 
