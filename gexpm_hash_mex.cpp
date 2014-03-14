@@ -18,7 +18,7 @@
 #include <algorithm>
 #include <math.h>
 
-#include "sparseheapnew.hpp" // include our heap functions
+#include "sparseheap.hpp" // include our heap functions
 
 #include "mex.h"
 
