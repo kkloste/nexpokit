@@ -3,12 +3,8 @@ title: "Network Matrix Exponentials for link-prediction, centrality, and more"
 layout: project
 ---
 
-NEXPOKIT
-========
-
-Network Matrix Exponentials for link-prediction, centrality, and more
-
-
+NEXPOKIT: Network Matrix Exponentials for link-prediction, centrality, and more
+===============================================================================
 
 ### Kyle Kloster
 ### David F. Gleich
@@ -28,6 +24,7 @@ Synopsis
     P = normout(G)';
     x = gexpmq_mex(P,1,11,1e-5,10*size(P,1));
     
+    
 Reusable codes
 --------------
 
@@ -36,7 +33,9 @@ Reusable codes
 * `gexpm_mex` a C++ mex implementation of Gauss-Southwell with a heap
 * `gexpmq_mex` a C++ mex implemetation of pseudo-Gauss-Southwell with
   a queue.
-* `kmatexp` a matlab implementation of an N+1 step Taylor rule
+* `kmatexp` a matlab implementation of an N+1 step Taylor polynomial via Horner rule
+* `taydeg.hpp` : contains function for selecting Taylor degree appropriate for input error of “tol”
+* `heap.hpp` : contains heap functions used in gexpm_mex
 
 
 Codes from others
@@ -64,4 +63,3 @@ To reproduce figure 3, run
     plot_runtime
     
     
-

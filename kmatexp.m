@@ -23,13 +23,14 @@ if nargin<3
     M = ceil(3*log(n)/log(2));
 end
 
+
 y = zeros(n,1);
 y(i) = 1/(M+1); 
 y = A*y;
 y(i) = y(i) + 1;
 
 for k=1:M
-	y = y./(M+1-k);
+    y = y./(M+1-k);
     y = A*y;
     y(i) = y(i) + 1;
 end
