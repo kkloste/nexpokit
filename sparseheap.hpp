@@ -27,7 +27,7 @@ struct sparse_max_heap
     size_t hsize;
     
     // set a sentinal. 
-    const static local_index_type lastval = std::numeric_limits<local_index_type>::max();  
+    local_index_type lastval; // = std::numeric_limits<local_index_type>::max();  
     
     index_type extractmax(value_type &val) {
         local_index_type lindmax = T[0];
@@ -137,6 +137,7 @@ struct sparse_max_heap
     : nextind(0), hsize(0), values(initial_size), L(initial_size), 
         lindex_to_index(initial_size), T(initial_size)
     { 
-        index_to_lindex.set_empty_key(std::numeric_limits<index_type>::max()); 
+    	lastval = std::numeric_limits<local_index_type>::max();
+	index_to_lindex.set_empty_key(std::numeric_limits<index_type>::max()); 
     }
 };

@@ -8,6 +8,10 @@
  * instead of a heap to approximate the largest element for the truncated 
  * taylor series approximation for a column of the matrix exponential
  */
+#ifndef __APPLE__
+#define __STDC_UTF_16__ 1
+#endif 
+
 #include <queue>
 #include <vector>
 #include <utility> // for pair sorting

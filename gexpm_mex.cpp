@@ -7,6 +7,9 @@
  * This file implements a gauss-southwell type method for the truncated 
  * taylor series approximation for a column of the matrix exponential
  */
+#ifndef __APPLE__
+#define __STDC_UTF_16__ 1
+#endif 
 
 #include "mex.h"
 #include <math.h>

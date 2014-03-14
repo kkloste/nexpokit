@@ -12,6 +12,10 @@
  *  (whereas t=1 must be the case for gexpmq)
  */
 
+#ifndef __APPLE__
+#define __STDC_UTF_16__ 1
+#endif 
+
 #include <vector>
 #include <queue>
 #include <utility> // for pair sorting
