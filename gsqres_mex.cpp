@@ -19,17 +19,7 @@
 #include <limits>
 #include <algorithm>
 #include <math.h>
-
-#ifdef __APPLE__
-#include <tr1/unordered_set>
-#include <tr1/unordered_map>
-#define tr1ns std::tr1
-#else
-#include <unordered_set>
-#include <unordered_map>
-#define __STDC_UTF_16__ 1
-#define tr1ns std
-#endif
+#include <sparsehash/dense_hash_map>
 
 #include <mex.h>
 
@@ -40,7 +30,7 @@ mexPrintf x; mexEvalString("drawnow"); } \
 int debugflag = 0;
 
 struct sparsevec {
-    typedef tr1ns::unordered_map<mwIndex,double> map_type;
+    typedef google::dense_hash_map<mwIndex,double> map_type;
     map_type map;
     /** Get an element and provide a default value when it doesn't exist
      * This command does not insert the element into the vector

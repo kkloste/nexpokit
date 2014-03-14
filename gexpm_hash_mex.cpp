@@ -145,7 +145,7 @@ void gexpm(sparserow* G, std::vector<mwIndex>& set, sparsevec& y,
     double sumresid = 0.;
     mwIndex ri;
     double rij = 0.;
-    sparsemaxheap r;
+    sparse_max_heap<mwIndex,double,unsigned int> r(1000);
     r.hsize=0;
 
      // set the initial residual
