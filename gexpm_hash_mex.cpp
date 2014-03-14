@@ -18,7 +18,7 @@
 #include <algorithm>
 #include <math.h>
 
-#include "sparseheap.hpp" // include our heap functions
+#include "sparseheapnew.hpp" // include our heap functions
 
 #include "mex.h"
 
@@ -276,7 +276,7 @@ void mexFunction(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])
     G.aj = mxGetIr(mat);
     G.a = mxGetPr(mat);
 
-    mwIndex maxsteps = G.n;
+    mwIndex maxsteps = G.n*G.n;
     if (nrhs >= 6){
         maxsteps = (mwIndex)mxGetScalar(prhs[5]);
     }
