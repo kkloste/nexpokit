@@ -8,13 +8,14 @@
  * instead of a heap to approximate the largest element for the truncated 
  * taylor series approximation for a column of the matrix exponential
  */
-
-#include "mex.h"
 #include <queue>
 #include <vector>
+#include <utility> // for pair sorting
 #include <assert.h>
 #include <math.h>
 #include "taydeg.hpp"
+
+#include "mex.h"
 
 #define DEBUGPRINT(x) do { if (debugflag) { \
 mexPrintf x; mexEvalString("drawnow"); } \
@@ -164,7 +165,7 @@ void mexFunction(
         maxsteps = (mwIndex)mxGetScalar(pargin[3]);
     }
 
-    mwIndex N = (mwIndex)taylordegree(tol);
+    mwIndex N = (mwIndex)taylordegree(1.0,tol);
     if (nargin == 5){
         N = (mwIndex)mxGetScalar(pargin[4]);
     }

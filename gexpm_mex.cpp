@@ -69,7 +69,6 @@ void gexpm(const mwSize n, const mwIndex* cp, const mwIndex* ari, const double* 
     mwIndex npush = 0;
     *nsteps = (double)maxsteps; // set the default, which we change on early exit
     
-    mwIndex npush = 0;
     mwIndex i,j,v,re,k,ri;
     double rijs, rij, ajv;
     double toln = tol/(double)n;
@@ -176,7 +175,7 @@ void mexFunction(
     if (nargin >= 4){
         maxsteps = (mwIndex)mxGetScalar(pargin[3]);
     }
-    mwIndex N = (mwIndex)taylordegree(tol);
+    mwIndex N = (mwIndex)taylordegree(1.,tol);
     if (nargin == 5){
         N = (mwIndex)mxGetScalar(pargin[4]);
     }
