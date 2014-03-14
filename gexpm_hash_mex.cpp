@@ -9,7 +9,7 @@
  */
 
 
-
+#include <sparsehash/dense_hash_map>
 #include <vector>
 #include <queue>
 #include <utility> // for pair sorting
@@ -30,8 +30,11 @@ mexPrintf x; mexEvalString("drawnow"); } \
 int debugflag = 0;
 
 struct sparsevec {
-    typedef tr1ns::unordered_map<mwIndex,double> map_type;
+    typedef google::dense_hash_map<mwIndex,double> map_type;
     map_type map;
+    sparsevec()  {
+        map.set_empty_key((mwIndex)(-1));
+    }
     /** Get an element and provide a default value when it doesn't exist
      * This command does not insert the element into the vector
      */
