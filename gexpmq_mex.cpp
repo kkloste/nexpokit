@@ -207,6 +207,3 @@ DEBUGPRINT(("calling gexpmq\n"));
            y, nsteps, npushes);
     
 }
-    
-    
-  

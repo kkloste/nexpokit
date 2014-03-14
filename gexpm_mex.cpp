@@ -67,6 +67,9 @@ void gexpm(const mwSize n, const mwIndex* cp, const mwIndex* ari, const double* 
     heap_up(hsize-1, hsize, T, L, r);
     
     mwIndex npush = 0;
+    *nsteps = (double)maxsteps; // set the default, which we change on early exit
+    
+    mwIndex npush = 0;
     mwIndex i,j,v,re,k,ri;
     double rijs, rij, ajv;
     double toln = tol/(double)n;
@@ -120,7 +123,6 @@ void gexpm(const mwSize n, const mwIndex* cp, const mwIndex* ari, const double* 
                 ajv = a[nzi];
                 y[v] += ajv*rijs;
             }
-//            npush+=cp[i+1]-cp[i];
         } else {
             // this is the interior case, and so we add the column of A 
             // to the residual at the next time step.

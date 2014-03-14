@@ -3,7 +3,6 @@ title: "Network Matrix Exponentials for link-prediction, centrality, and more"
 layout: project
 ---
 
-
 NEXPOKIT: Network Matrix Exponentials for link-prediction, centrality, and more
 ===============================================================================
 
@@ -24,6 +23,7 @@ Synopsis
     G = load_graph('dolphins');
     P = normout(G)';
     x = gexpmq_mex(P,1,11,1e-5,10*size(P,1));
+    
     
 Reusable codes
 --------------

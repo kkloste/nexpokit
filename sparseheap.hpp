@@ -15,7 +15,7 @@
 #endif
 
 
-struct sparsemaxheap{
+struct sparsemaxheap {
     typedef unsigned int uint;
     typedef tr1ns::unordered_map< uint, double > map_type;
     typedef tr1ns::unordered_map< uint, uint > T_map;

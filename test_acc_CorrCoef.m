@@ -130,3 +130,4 @@ for network_id=1:15
 
 end % done all networks
 %%
+save 'test_acc_CorrCoeff.mat' record

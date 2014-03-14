@@ -43,7 +43,7 @@ for network_id=nets;
         
         for ti=1:numel(tols)
             tol = tols(ti);
-            xapprox = gexpm_mex(P,j,11,tol,10*n);
+            xapprox = gexpmq_mex(P,j,11,tol,10*n);
             [~,pxa] = sort(xapprox,'descend');
             xapproxnn = xapprox;
             xapproxnn(j) = -Inf;
