@@ -174,7 +174,7 @@ void hpexpm(sparserow* G,
         listsize = 0;
         for (mwIndex ind = 0; ind < hsize; ind++) {
             mwIndex Tind = T[ind];
-            valind = v[ind]/(Nk);
+            double valind = v[ind]/(Nk);
             for ( mwIndex nzi=G->ai[Tind]; nzi < G->ai[Tind+1]; ++nzi) {
                 mwIndex arinzi = G->aj[nzi];
                 if (y[arinzi] == 0){
