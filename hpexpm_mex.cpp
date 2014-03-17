@@ -79,16 +79,15 @@ unsigned int taylordegree(const double t, const double eps) {
  */
 
 void hpexpm(sparserow* G,
-            const mwIndex c, const double eps, const double t, const mwIndex maxnnz, double* y)
+            const mwIndex c, const double eps, const double t, const mwIndex maxnnz,
+            double* y)
 {
     // Note: N is taken to be of type "double" because
     // it's used in computations below as type "double".
     
     mwIndex N = taylordegree(t,eps);
     mwIndex n = G->n;
-	double valind,minval;
-    mwIndex hsize = 0;
-    mwIndex ind, Tind, ri, arinzi, listind, Nk, nzi;
+
     mwSize listsize = 0;
     mwSize maxlistsize = std::min( 4*maxnnz, n);
     // allocate data
@@ -102,8 +101,8 @@ void hpexpm(sparserow* G,
     
     // mexPrintf("pass initialize \n");
     // Unroll first iterate of Horner's Rule
-    for (nzi=G->ai[c]; nzi < G->ai[c+1]; ++nzi) {
-		arinzi = G->aj[nzi];
+    for (mwIndex nzi=G->ai[c]; nzi < G->ai[c+1]; ++nzi) {
+		mwIndex arinzi = G->aj[nzi];
         y[arinzi] += G->a[nzi]/N;
 		list[listsize] = arinzi;
 		listsize++;
@@ -125,25 +124,24 @@ void hpexpm(sparserow* G,
     
     // HORNER'S RULE ITERATES
     for (mwIndex k=1; k <= N-1 ; k++){
-		Nk = (mwIndex)N-k;
-        // y = y./(N-k);
-        // y = A*y;
-		// y[c] = y[c] + 1;
-        listind = 0; hsize = 0; valind = 0.; minval = 0.; ri = 0;
+		mwIndex Nk = (mwIndex)N-k;
+        mwIndex listind = 0;
+        mwIndex hsize = 0;
+
         // for each entry of y, check if we put it in the heap
         while ( listind < listsize ){
-            ind = list[listind];
-            valind = y[ind];
+            mwIndex ind = list[listind];
+            double valind = y[ind];
             
             // if the value is nonzero, we might add it to heap
             if (valind > 0) {
                 // if the heap is full, we might have to delete
                 if ( hsize >= maxnnz ){
-                    minval = y[T[0]];
+                    double minval = y[T[0]];
                     // if new entry is big enough, add it
                     if ( minval < valind ){
                         // replace T[0] with y[ind], then heap_down
-                        ri = T[0];
+                        mwIndex ri = T[0];
                         T[0] = ind;
                         y[ri] = 0; // drop that entry from y
                         heap_down(0, hsize, T, y);
@@ -163,8 +161,8 @@ void hpexpm(sparserow* G,
         // Copy the nonzeros in the heap of y into v
         // and zero out y, so it can be set equal to
         // the matvec y = A*v
-        for (ind = 0; ind < hsize ; ind++){
-            Tind = T[ind];
+        for (mwIndex ind = 0; ind < hsize ; ind++){
+            mwIndex Tind = T[ind];
             v[ind] = y[Tind];
             y[Tind] = 0;
         }
@@ -174,11 +172,11 @@ void hpexpm(sparserow* G,
         // i.e. the maxnnz largest entries that were in y.
         
         listsize = 0;
-        for (ind = 0; ind < hsize; ind++) {
-            Tind = T[ind];
+        for (mwIndex ind = 0; ind < hsize; ind++) {
+            mwIndex Tind = T[ind];
             valind = v[ind]/(Nk);
-            for ( nzi=G->ai[Tind]; nzi < G->ai[Tind+1]; ++nzi) {
-                arinzi = G->aj[nzi];
+            for ( mwIndex nzi=G->ai[Tind]; nzi < G->ai[Tind+1]; ++nzi) {
+                mwIndex arinzi = G->aj[nzi];
                 if (y[arinzi] == 0){
                     list[listsize] = arinzi;
                     listsize++;
