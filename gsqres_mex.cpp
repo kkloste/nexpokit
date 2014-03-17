@@ -36,6 +36,10 @@ int debugflag = 0;
 struct sparsevec {
     typedef google::dense_hash_map<mwIndex,double> map_type;
     map_type map;
+
+    sparsevec() {
+        map.set_empty_key((mwIndex)(-1));
+    }
     /** Get an element and provide a default value when it doesn't exist
      * This command does not insert the element into the vector
      */
@@ -167,6 +171,7 @@ void gexpmq(sparserow* G, std::vector<mwIndex>& set, sparsevec& y,
     mwIndex ri = 0;
     double rij = 0;
     sparsevec rvec;
+    double sumresid = 0.;
     
     // i is the node index, j is the "step"
 #define rentry(i,j) ((i)+(j)*n)
@@ -176,6 +181,7 @@ void gexpmq(sparserow* G, std::vector<mwIndex>& set, sparsevec& y,
         ri = set[i];
         //rij = value in entry ri of the input vector
         rij = 1.;
+	sumresid += rij;
         rvec.map[rentry(ri,0)]+=rij;
         Q.push(rentry(ri,0));
     }
@@ -197,6 +203,7 @@ void gexpmq(sparserow* G, std::vector<mwIndex>& set, sparsevec& y,
         
         // update r, no need to update heap here
         rvec.map[ri] = 0;
+	sumresid -= rij;
         
         double rijs = t*rij/(double)(j+1);
         double ajv = 1./degofi;
@@ -219,6 +226,7 @@ void gexpmq(sparserow* G, std::vector<mwIndex>& set, sparsevec& y,
                 mwIndex re = rentry(v,j+1);
                 double reold = rvec.get(re);
                 double renew = reold + update;
+		sumresid += update;
                 rvec.map[re] = renew;
                 if (renew >= pushcoeff[j+1] && reold < pushcoeff[j+1]) {
                     Q.push(re);
@@ -226,6 +234,7 @@ void gexpmq(sparserow* G, std::vector<mwIndex>& set, sparsevec& y,
             }
             *npush += degofi;
         }
+	if (sumresid < eps) { return; }
         // terminate when Q is empty, i.e. we've pushed all r(i,j) > exp(t)*eps*/(N*n*psi_j(t))
         if ( Q.size() == 0) { return; }
     }//end 'while'
@@ -279,7 +288,8 @@ void mexFunction(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])
                           "gsqres_mex needs square input matrix");
     }
     
-    double* npushes;
+    double npushesmem = 0.;
+    double* npushes = &npushesmem;
     if (nlhs > 1){
         plhs[1] = mxCreateDoubleMatrix(1,1,mxREAL);
         npushes = mxGetPr(plhs[1]);

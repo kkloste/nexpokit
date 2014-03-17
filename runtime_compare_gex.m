@@ -47,9 +47,9 @@ tic; [y hpush hstep] = gexpm_hash_mex(P,ind,tol,t); time_vals(trial,alg_num) = t
 
 alg_num = 5;
 %fprintf('\n alg_num = %i \t trial = %i',alg_num, trial);
-%    tic; [y npush] = gexpm_ord_mex(P,ind,tol); time_vals(trial,alg_num) = toc;
-%    err_vals(trial,alg_num) = norm(x_true - y,1)/normtrue;
-% fprintf('\t %8.7f', time_vals(trial,alg_num));
+    tic; [y npush] = gsqres_mex(P,ind,tol,t); time_vals(trial,alg_num) = toc;
+    err_vals(trial,alg_num) = norm(x_true - y,1)/normtrue;
+fprintf('\t %8.7f', time_vals(trial,alg_num));
 
 fprintf('\n err = %8i \t %8.7f \t %8.7f \t %f \t %f ', 0, err_vals(trial,2),err_vals(trial,3),err_vals(trial,4),err_vals(trial,5));
 
