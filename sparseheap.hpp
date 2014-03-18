@@ -134,8 +134,8 @@ struct sparse_max_heap
     }
     
     sparse_max_heap(size_t initial_size) 
-    : nextind(0), hsize(0), values(initial_size), L(initial_size), 
-        lindex_to_index(initial_size), T(initial_size)
+    : nextind(0), lindex_to_index(initial_size), 
+      values(initial_size), T(initial_size), L(initial_size), hsize(0)
     { 
     	lastval = std::numeric_limits<local_index_type>::max();
 	index_to_lindex.set_empty_key(std::numeric_limits<index_type>::max()); 
