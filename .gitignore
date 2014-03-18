@@ -2,3 +2,5 @@
 *.mex*
 *.o
 *.eps
+.DS_Store
+convert_*.m
