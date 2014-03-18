@@ -1,8 +1,12 @@
- load /scratch2/dgleich/kyle/colstochdata/flickr-bidir-cc; dataset = 'flickr';
+% load /scratch2/dgleich/kyle/colstochdata/flickr-bidir-cc; dataset = 'flickr';
 % load /scratch2/dgleich/kyle/colstochdata/ljournal-2008; dataset = 'ljournal';
 % load /scratch2/dgleich/kyle/colstochdata/twitter-2010; dataset = 'twitter';
 % load /scratch2/dgleich/kyle/colstochdata/com-friendster; dataset = 'friendster';
 
+A = load_graph('flickr-bidir-cc'); P = normout(A)';
+dataset = 'flickr';
+
+%%
 
 n = size(P,1);
 tol = 1e-4;
