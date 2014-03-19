@@ -33,7 +33,8 @@ mexPrintf x; mexEvalString("drawnow"); } \
 } while (0)
 
 int debugflag = 0;
-
+    typedef google::dense_hash_map<mwIndex,double> map_type;
+    
 struct sparsevec {
     typedef google::dense_hash_map<mwIndex,double> map_type;
     map_type map;
