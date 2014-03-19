@@ -6,7 +6,7 @@
 
 n = size(P,1);
 maxnnz = 10000;
-tol = 1e-4
+tol = 1e-4;
 t = 1;
 num_trials = 5;
 num_algs = 5;
@@ -15,35 +15,31 @@ time_vals = zeros(num_trials,num_algs);
 err_vals = zeros(num_trials, num_algs);
 
 
-fprintf('\n Num of trials = %i \t dataset = %s',num_trials, dataset);
-heading = '\n Algorithm = expmv \t gsqres \t gexpmq \t hpexpm \t expm_svec \n';
+fprintf('\n Num of trials = %i \t dataset = %s \t tol = %5.8f \t maxnnz = %i',num_trials, dataset, tol, maxnnz);
+heading = '\n Algorithm = expmv \t gsqres \t gexpmq \t hpexpm \t expm_svec';
 % '\n Algorithm = expmv \t gsqres \t gexpmq \t hpexpm \t expm_svec \n'
 fprintf(heading);
 for trial=1:num_trials
-fprintf('\n trial num = %i\n',trial);
+fprintf('\n\n trial num = %i',trial);
     ind = seeds(trial);
     ec = eyei(n,ind);
 
 alg_num = 1;
-%fprintf('\n alg_num = %i \t trial = %i',alg_num, trial);
     tic; [x_true,s,m,mv,mvd] = expmv(t,P,ec,[],'half'); time_vals(trial,alg_num) = toc;
     normtrue = norm(x_true,1); %[vtrue strue] = sort(x_true, 'descend');
 fprintf('\n time = %8.7f', time_vals(trial,alg_num));
         
 alg_num = 2;
-%fprintf('\n alg_num = %i \t trial = %i',alg_num, trial);
     tic; [y npush] = gsqres_mex(P,ind,tol,t); time_vals(trial,alg_num) = toc;
     err_vals(trial,alg_num) = norm(x_true - y,1)/normtrue;
 fprintf('\t %8.7f', time_vals(trial,alg_num));
         
 alg_num = 3;
-%fprintf('\n alg_num = %i \t trial = %i',alg_num, trial);
     tic; [y nstep npush] = gexpmq_mex(P,ind,tol); time_vals(trial,alg_num) = toc;
     err_vals(trial,alg_num) = norm(x_true - y,1)/normtrue;
 fprintf('\t %8.7f', time_vals(trial,alg_num));
 
 alg_num = 4;
-%fprintf('\n alg_num = %i \t trial = %i',alg_num, trial);
 %    tic; [y hpush hstep] = gexpm_hash_mex(P,ind,tol,t); time_vals(trial,alg_num) = toc;
 %    err_vals(trial,alg_num) = norm(x_true - y,1)/normtrue;
     tic; y = hpexpm_mex(P,ind,tol,t,maxnnz); time_vals(trial,alg_num) = toc;
@@ -51,7 +47,6 @@ alg_num = 4;
 fprintf('\t %8.7f', time_vals(trial,alg_num));
 
 alg_num = 5;
-%fprintf('\n alg_num = %i \t trial = %i',alg_num, trial);
     tic; [y svpush] = expm_svec_mex(P,ind,tol,t,maxnnz); time_vals(trial,alg_num) = toc;
     err_vals(trial,alg_num) = norm(x_true - y,1)/normtrue;
 fprintf('\t %8.7f', time_vals(trial,alg_num));
