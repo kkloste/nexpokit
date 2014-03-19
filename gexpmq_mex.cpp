@@ -48,6 +48,22 @@ DEBUGPRINT(("Input n=%i N=%i c=%i tol=%i maxsteps=%i\n", n, N, c, tol, maxsteps)
     double sumresid = 0.;
     double tolnN = tol/(n*N);
 
+	// compute the tolerances for the components of the residual
+    std::vector<double> psivec(N+1,0.);
+    psivec[N] = 1;
+    for (mwIndex k = 1; k <= N ; k++){
+        psivec[N-k] = psivec[N-k+1]*t/(double)(N-k+1) + 1;
+    } // psivec[k] = psi_k(t)
+
+    pushcoeff[0] = (exp(t)*eps/(double)N)/psivec[0];
+	// This is a more numerically stable way to compute
+	//      pushcoeff[j] = exp(t)*eps/(N*psivec[j])
+	for (lindex k = 1; k <= N ; k++){
+		pushcoeff[k] = pushcoeff[k-1]*(psivec[k-1]/psivec[k]);
+	}
+	
+
+
     // allocate data
     
     std::vector<double> rvec(M,0.);
@@ -61,88 +77,75 @@ DEBUGPRINT(("delcare queue\n"));
     
 DEBUGPRINT(("Init...\n"));
  
-    // set the initial residual, add to the heap, and update
+    // set the initial residual, push onto queue
     r[rentry(c,0)] = 1;
     sumresid += 1.;
     Q.push(rentry(c,0));
     
     mwIndex npush = 0;
     *nsteps = (double)maxsteps; // set the default, which we change on early exit
-    
+    mwIndex iter = 0;
 DEBUGPRINT(("Before for-loop\n"));
-    for (mwIndex iter = 0; iter < maxsteps; ++iter) {
-        
-        /* STEP 1: pop top element off of heap
-         *  * get indices i,j from T
-         *  * add r(i,j) to y(i)
-         *  * set r(i,j) to zero (update sumresid)
-         * STEP 2: get i^th column from A
-         *  * get neighbors of ith node
-         *  * (if j == N-1), add the column to y instead of r.
-         *  * add as a column to next time-step of r, and update heap
-         *  *  (update sumresid)
-         * Check for convegence!
-        */
-        
-        // STEP 1: pop top element off of heap
-        mwIndex ri = Q.front();
-        Q.pop();
-        
-        // decode incides i,j
-        mwIndex i = ri%n;
-        mwIndex j = ri/n;
-        
-        double rij = r[ri];
-        
-        // update yi
-        y[i] += rij;
-        
-        // update r, no need to update heap here 
-        r[ri] = 0;
-        sumresid -= rij;
-        double rijs = rij/(double)(j+1);
-        
-        if (j == N-1) {
-            // this is the terminal case, and so we add the column of A 
-            // directly to the solution vector y
-            for (mwIndex nzi=cp[i]; nzi < cp[i+1]; ++nzi) {
-                mwIndex v = ari[nzi];
-                double ajv = a[nzi];
-                y[v] += ajv*rijs;
-//                sumsol += ajv*rijs;
-            }
-            npush+=cp[i+1]-cp[i];
-        } else {
-            // this is the interior case, and so we add the column of A 
-            // to the residual at the next time step.
-            for (mwIndex nzi=cp[i]; nzi < cp[i+1]; ++nzi) {
-                mwIndex v = ari[nzi];
-                double ajv = a[nzi];
-                mwIndex re = rentry(v,j+1);
-                double reold = r[re];
-                r[re] += ajv*rijs;
-                sumresid += ajv*rijs;
-//                sumsol += ajv*rijs;
-                
-                if (r[re] > tolnN) {
-                    if (reold < tolnN) {
-                        Q.push(re);
-                    }
-                }
-            }
-            npush+=cp[i+1]-cp[i];
-        }
-        
-        
-//        if (sumresid < tol || Q.size() == 0 || sumsol > -tol ) {
-        if (sumresid < tol || Q.size() == 0) {
-            *nsteps = (double)iter;
-            break;
-        }
-    }
-    
+	for (mwIndex j = 0; j <= N ; j++){
+		mwIndex numnnz = Q.size();
+		double pushtol = pushcoeff[j]/(double)numnnz;
+		for ( mwIndex Qentries = 1; <= numnnz ; Qentries++){
+			if (iter > maxnnz){
+				j = N+1;
+				break;
+			}
+			iter++;
+		
+			// STEP 1: pop top element off of residual
+			mwIndex ri = Q.front();
+			Q.pop();
+			double rij = r[ri];
+			r[ri] = 0;
+			sumresid -= rij;
+			  
+			// decode incides i,j
+			mwIndex i = ri%n;
+//			mwIndex j = ri/n;
+
+			// update yi
+			y[i] += rij;
+
+			if ( rij >= pushtol ){ // not small enough to round it off
+				double rijs = rij/(double)(j+1);
+				if (j == N-1) {
+					// this is the terminal case, and so we add the column of A 
+					// directly to the solution vector y
+					for (mwIndex nzi=cp[i]; nzi < cp[i+1]; ++nzi) {
+						mwIndex v = ari[nzi];
+						double ajv = a[nzi];
+						y[v] += ajv*rijs;
+					}
+					npush+=cp[i+1]-cp[i];
+				} else {
+					// this is the interior case; add the column of A 
+					// to the residual at the next time step.
+					for (mwIndex nzi=cp[i]; nzi < cp[i+1]; ++nzi) {
+						mwIndex v = ari[nzi];
+						double ajv = a[nzi];
+						mwIndex re = rentry(v,j+1);
+						double reold = r[re];
+						r[re] += ajv*rijs;
+						sumresid += ajv*rijs;
+						// if this wasn't in the queue, push it in
+						if (r[re] > 0 && reold == 0) { Q.push(re); }
+					}
+					npush+=cp[i+1]-cp[i];
+				}
+			}
+			if (sumresid < tol || Q.size() == 0) {
+				Qentries = numnnz+1;
+				j = N+1;
+				break;
+			}			
+		} //end pushes for particular Taylor term
+    } // end Taylor terms
+	*nsteps = (double)iter;    
     *npushes = (double)npush;
-    
     return; // because we "break" out of for loop
 }
 
