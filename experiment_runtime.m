@@ -15,7 +15,7 @@ t = 1;
 
 datasizes = zeros(num_data,1); % holds n for each graph
 seeds = zeros(num_trials,num_data); % holds seeds for each trial for each graph
-xtrues = sparse(1,num_trials,num_data);
+xtrues = sparse(1,num_trials*num_data);
 time_vals = zeros(num_algs,num_trials,num_data);
 err_vals = zeros(num_algs,num_trials,num_data);
 
@@ -45,7 +45,7 @@ for dataindex = 1:num_data
 		alg_num = 1;
 			tic; [x_true,s,m,mv,mvd] = expmv(t,P,ec,[],'single'); time_vals(alg_num, trial, dataindex) = toc;
 			normtrue = norm(x_true,1); %[vtrue strue] = sort(x_true, 'descend');
-			xtrues(:,trial,dataindex) = x_true;
+			xtrues(:,trial + num_trials*(dataindex-1)) = sparse(x_true);
 		fprintf('\n time = %8.7f', time_vals(trial,alg_num));
 
 		alg_num = alg_num + 1;
