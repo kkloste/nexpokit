@@ -132,13 +132,6 @@ void gexpm(sparserow* G, std::vector<mwIndex>& set, sparsevec& y,
 
     DEBUGPRINT( ("Input n=%i N=%i tol=%f maxsteps=%i\n", n, N, eps, maxsteps) );
     
-    std::vector<double> psivec(N+1,0.);
-    psivec[N] = 1;
-    for (mwIndex k = 1; k <= N ; k++){
-        psivec[N-k] = psivec[N-k+1]*t/(double)(N-k+1) + 1;
-    } // now psivec[k] = psi_k(t)
-    
-
 /**
  *  prepare the RESIDUAL heap
  */
@@ -211,7 +204,7 @@ DEBUGPRINT(("gexpm_hash: hsize = %i , iter = %i,  sumresid = %.8f,  rij = %.8f \
             }
             *npushes += degofi;
         }
-        if (sumresid < eps/exp(t) || r.hsize == 0) {
+        if (sumresid < eps*exp(t) || r.hsize == 0) {
             DEBUGPRINT(("gexpm_hash: BREAK: hsize = %i , iter = %i,  sumresid = %.8f,  rij = %.8f \n", r.hsize, iter, sumresid, rij));
             *nsteps = (double)iter;
             break;
