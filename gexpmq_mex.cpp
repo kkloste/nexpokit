@@ -43,12 +43,13 @@ void gexpmq(const mwSize n, const mwIndex* cp, const mwIndex* ari, const double*
             const mwIndex c, const double t,  const double tol, const mwIndex maxsteps, 
             double* y, double *nsteps, double *npushes)
 {
-DEBUGPRINT(("Input n=%i N=%i c=%i tol=%i maxsteps=%i\n", n, N, c, tol, maxsteps));
 	mwIndex N = (mwIndex)taylordegree(t,tol);
+DEBUGPRINT(("Input n=%i N=%i c=%i tol=%i maxsteps=%i\n", n, N, c, tol, maxsteps));
     mwIndex M = n*N;
     double sumresid = 0.;
 	// compute the tolerances for the components of the residual
     std::vector<double> psivec(N+1,0.);
+    std::vector<double> pushcoeff(N+1,0.);
     psivec[N] = 1;
     for (mwIndex k = 1; k <= N ; k++){
         psivec[N-k] = psivec[N-k+1]*t/(double)(N-k+1) + 1;
