@@ -197,7 +197,7 @@ DEBUGPRINT(("Starting call \n"));
         mexErrMsgIdAndTxt("gexpmq_mex:wrongInputParamterTol",
                           "gexpmq_mex needs 0 < tol <= 1");
     }
-    if ( c < 0 || c >= n ){
+    if ( c >= n ){
         mexErrMsgIdAndTxt("gexpmq_mex:wrongInputParamterC",
                           "gexpmq_mex needs 1 <= c <= n");
     }

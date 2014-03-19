@@ -208,7 +208,7 @@ void mexFunction(
         mexErrMsgIdAndTxt("gexpm_mex:wrongInputParamterTol",
                           "gexpm_mex needs 0 < tol <= 1");
     }
-    if ( c < 0 || c >= n ){
+    if ( c >= n ){
         mexErrMsgIdAndTxt("gexpm_mex:wrongInputParamterC",
                           "gexpm_mex needs 1 <= c <= n");
     }
