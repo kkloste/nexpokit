@@ -16,8 +16,8 @@ err_vals = zeros(num_trials, num_algs);
 
 
 fprintf('\n Num of trials = %i \t dataset = %s',num_trials, dataset);
-heading = '\n ave error = expmv \t gsqres \t gexpmq \t hpexpm \t expm_svec \n';
-% '\n ave error = expmv \t gsqres \t gexpmq \t hpexpm \t expm_svec \n'
+heading = '\n Algorithm = expmv \t gsqres \t gexpmq \t hpexpm \t expm_svec \n';
+% '\n Algorithm = expmv \t gsqres \t gexpmq \t hpexpm \t expm_svec \n'
 fprintf(heading);
 for trial=1:num_trials
 fprintf('\n trial num = %i\n',trial);
