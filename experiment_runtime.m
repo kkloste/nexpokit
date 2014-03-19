@@ -24,7 +24,7 @@ P=1;
 
 for dataindex = 1:num_data
 	clear P;
-	dataset = datalist(dataindex);
+	dataset = char(datalist(dataindex));
 	load(strcat('/scratch2/dgleich/kyle/colstochdata/', dataset));
 	datasizes(dataindex) = size(P,1);
 	n = datasizes(dataindex);
