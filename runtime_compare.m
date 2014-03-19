@@ -54,6 +54,6 @@ fprintf('\t %8.7f', time_vals(trial,alg_num));
 fprintf('\n err = %8i \t %8.7f \t %8.7f \t %f \t %f ', 0, err_vals(trial,2),err_vals(trial,3),err_vals(trial,4),err_vals(trial,5));
 
 end
-fprintf(heading);
+fprintf(strcat('\n',heading));
 fprintf('\n ave error = %8i \t %8.7f \t %8.7f \t %f \t %f ',0, sum(err_vals(:,2))/num_trials, sum(err_vals(:,3))/num_trials, sum(err_vals(:,4))/num_trials, sum(err_vals(:,5))/num_trials);
 fprintf('\n ave time = %8f \t %8f \t %8f \t %f \t %8.7f \n',sum(time_vals(:,1))/num_trials, sum(time_vals(:,2))/num_trials, sum(time_vals(:,3))/num_trials, sum(time_vals(:,4))/num_trials, sum(time_vals(:,5))/num_trials );
