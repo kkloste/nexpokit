@@ -16,7 +16,7 @@ err_vals = zeros(num_trials, num_algs);
 
 
 fprintf('\n Num of trials = %i \t dataset = %s',num_trials, dataset);
-fprintf('\n ave error = expmv \t gsqres \t gexpmq \t hpexpm \t expm_svec \n');
+fprintf('\n ave error = expmv \t gsqres \t gexpmq \t gexpm_hash \t expm_svec \n');
 for trial=1:num_trials
 fprintf('\n trial num = %i\n',trial);
     ind = seeds(trial);
@@ -30,8 +30,8 @@ fprintf('\n time = %8.7f', time_vals(trial,alg_num));
         
 alg_num = 2;
 %fprintf('\n alg_num = %i \t trial = %i',alg_num, trial);
-%    tic; [y npush] = gsqres_mex(P,ind,tol,t); time_vals(trial,alg_num) = toc;
-%    err_vals(trial,alg_num) = norm(x_true - y,1)/normtrue;
+    tic; [y npush] = gsqres_mex(P,ind,tol,t); time_vals(trial,alg_num) = toc;
+    err_vals(trial,alg_num) = norm(x_true - y,1)/normtrue;
 fprintf('\t %8.7f', time_vals(trial,alg_num));
         
 alg_num = 3;
@@ -42,10 +42,10 @@ fprintf('\t %8.7f', time_vals(trial,alg_num));
 
 alg_num = 4;
 %fprintf('\n alg_num = %i \t trial = %i',alg_num, trial);
-%    tic; [y hpush hstep] = gexpm_hash_mex(P,ind,tol,t); time_vals(trial,alg_num) = toc;
-%    err_vals(trial,alg_num) = norm(x_true - y,1)/normtrue;
-    tic; y = hpexpm_mex(P,ind,6,maxnnz); time_vals(trial,alg_num) = toc;
+    tic; [y hpush hstep] = gexpm_hash_mex(P,ind,tol,t); time_vals(trial,alg_num) = toc;
     err_vals(trial,alg_num) = norm(x_true - y,1)/normtrue;
+%    tic; y = hpexpm_mex(P,ind,6,maxnnz); time_vals(trial,alg_num) = toc;
+%    err_vals(trial,alg_num) = norm(x_true - y,1)/normtrue;
 fprintf('\t %8.7f', time_vals(trial,alg_num));
 
 alg_num = 5;
@@ -57,7 +57,7 @@ fprintf('\t %8.7f', time_vals(trial,alg_num));
 fprintf('\n err = %8i \t %8.7f \t %8.7f \t %f \t %f ', 0, err_vals(trial,2),err_vals(trial,3),err_vals(trial,4),err_vals(trial,5));
 
 end
-%fprintf('\n ave error = expmv \t gsqres \t gexpmq \t gexpm_hash \t expm_svec \n');
-fprintf('\n ave error = expmv \t gsqres \t gexpmq \t hpexpm \t expm_svec \n');
+fprintf('\n ave error = expmv \t gsqres \t gexpmq \t gexpm_hash \t expm_svec \n');
+%fprintf('\n ave error = expmv \t gsqres \t gexpmq \t hpexpm \t expm_svec \n');
 fprintf('\n ave error = %8i \t %8.7f \t %8.7f \t %f \t %f ',0, sum(err_vals(:,2))/num_trials, sum(err_vals(:,3))/num_trials, sum(err_vals(:,4))/num_trials, sum(err_vals(:,5))/num_trials);
 fprintf('\n ave time = %8f \t %8f \t %8f \t %f \t %8.7f \n',sum(time_vals(:,1))/num_trials, sum(time_vals(:,2))/num_trials, sum(time_vals(:,3))/num_trials, sum(time_vals(:,4))/num_trials, sum(time_vals(:,5))/num_trials );
