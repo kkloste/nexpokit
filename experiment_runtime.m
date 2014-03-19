@@ -14,7 +14,7 @@ tol = 1e-4;
 t = 1;
 
 datasizes = zeros(num_data,1); % holds n for each graph
-seeds = zeros(num_trials,num_data); holds seeds for each trial for each graph
+seeds = zeros(num_trials,num_data); % holds seeds for each trial for each graph
 xtrues = sparse(1,num_trials,num_data);
 time_vals = zeros(num_algs,num_trials,num_data);
 err_vals = zeros(num_algs,num_trials,num_data);
