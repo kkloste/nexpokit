@@ -58,7 +58,7 @@ DEBUGPRINT(("Input n=%i N=%i c=%i tol=%i maxsteps=%i\n", n, N, c, tol, maxsteps)
     pushcoeff[0] = (exp(t)*tol/(double)N)/psivec[0];
 	// This is a more numerically stable way to compute
 	//      pushcoeff[j] = exp(t)*tol/(N*psivec[j])
-	for (lindex k = 1; k <= N ; k++){
+	for (mwIndex k = 1; k <= N ; k++){
 		pushcoeff[k] = pushcoeff[k-1]*(psivec[k-1]/psivec[k]);
 	}
 	
@@ -89,13 +89,12 @@ DEBUGPRINT(("Before for-loop\n"));
 	for (mwIndex j = 0; j <= N ; j++){
 		mwIndex numnnz = Q.size();
 		double pushtol = pushcoeff[j]/(double)numnnz;
-		for ( mwIndex Qentries = 1; <= numnnz ; Qentries++){
-			if (iter > maxnnz){
+		for ( mwIndex Qentries = 1; Qentries <= numnnz ; Qentries++){
+			if (iter > maxsteps){
 				j = N+1;
 				break;
 			}
 			iter++;
-		
 			// STEP 1: pop top element off of residual
 			mwIndex ri = Q.front();
 			Q.pop();
@@ -105,7 +104,7 @@ DEBUGPRINT(("Before for-loop\n"));
 			  
 			// decode incides i,j
 			mwIndex i = ri%n;
-//			mwIndex j = ri/n;
+			//	mwIndex j = ri/n;
 
 			// update yi
 			y[i] += rij;
@@ -205,7 +204,7 @@ DEBUGPRINT(("Starting call \n"));
     
 DEBUGPRINT(("calling gexpmq\n"));
     gexpmq(n, cp, ri, a, // sparse matrix
-           c, N, tol, maxsteps, // parameters
+           c, t, tol, maxsteps, // parameters
            y, nsteps, npushes);
     
 }
