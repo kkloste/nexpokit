@@ -231,7 +231,6 @@ void expm_svec(sparserow* G, std::vector<mwIndex>& set, sparsevec& y,
                 if ( hsize >= maxnnz ){
                     double minval = d[0]; // y.map[T[0]];
                     if (valind > minval){
-                        // unnecessary                        y.map[T[0]] = 0; // drop from y
                         T[0] = ind; // replace root with new entry
                         d[0] = valind;
                         heap_down(0, hsize, T, d);
