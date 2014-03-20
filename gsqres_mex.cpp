@@ -181,7 +181,7 @@ struct local_stochastic_graph_exponential
             psivec[N-k] = psivec[N-k+1]*t/(double)(N-k+1) + 1;
         } // psivec[k] = psi_k(t)
 
-        pushcoeff[0] = (((exp(t)/(double)n)*eps)/(double)N)/psivec[0];
+        pushcoeff[0] = ((exp(t)*eps)/(double)N)/psivec[0];
         // This is a more numerically stable way to compute
         //      pushcoeff[j] = exp(t)*eps/(n*N*psivec[j])
         for (lindex k = 1; k <= N ; k++){
@@ -250,7 +250,8 @@ struct local_stochastic_graph_exponential
         std::vector< double > y;
      
         double sumresid = 0.;
-        std::queue< std::pair<lindex, int> > Q;
+        // the queue stores the entries for the next time step
+        std::queue< lindex > Q;
         
         // set the initial residual, add to the queue
         for (size_t i=0; i<set.size(); ++i) {
@@ -261,74 +262,80 @@ struct local_stochastic_graph_exponential
             sumresid += rij;
             grow_vector_to_index(resid[0], li, 0.);
             resid[0][li] += rij;
-            Q.push(std::make_pair(li, 0));
+            Q.push( li );
         }
         
-        while (1) {
-            // STEP 1: pop top element off of heap
-            std::pair<lindex, int> rentry = Q.front();
-            Q.pop();
-            // decode incides i,j
-            lindex i = rentry.first;
-            int j = rentry.second;
+        for (lindex j = 0; j < N; ++j) {
+            // STEP 0: determine how many entries are in the queue
+            // and determine what the residual tolerance is to 
+            // push
+            size_t qsize = Q.size();
+            double pushtol = pushcoeff[j]/(double)qsize;
             
-            double rij = resid[j][i];
+            // STEP 1: process each of the next elements in the 
+            // queue and add them to the next level
             
-            if (rij < pushcoeff[j]*(double)n / (double)(nextind)) {
-                // then we shouldn't handle rij now, and should just push this
-                // element back on the queue.
-                Q.push(rentry);
-                continue;
-            }
+            for (size_t qi = 0; qi < qsize; ++qi) {
+                lindex i = Q.front();
+                Q.pop();
+                            
+                double rij = resid[j][i];
             
-            // STEP 2: fetch the row
-            fetch_row(i);
-            
-            // find the degree
-            std::pair<lindex, lindex> offsets = lp[i];
-            double degofi = (double)(offsets.second - offsets.first);
-            
-            // update the solution
-            grow_vector_to_index(y, i, 0.);
-            y[i] += rij;
-            
-            resid[j][i] = 0.;
-            sumresid -= rij;
-            
-            double rijs = t*rij/(double)(j+1);
-            double ajv = 1./degofi;
-            double update = rijs*ajv;
-            
-            if ((lindex)j == N-1) {
-                // this is the terminal case, and so we add the column of A
-                // directly to the solution vector y
-                for (lindex nzi = offsets.first; nzi < offsets.second; ++nzi) {
-                    lindex v = lneigh[nzi];
-                    grow_vector_to_index(y, v, 0.);
-                    y[v] += update;
+                if (rij < pushtol) {
+                    // skip to the next iteration of the loop
+                    continue;
                 }
-                npush += degofi;
-            } else {
-                // this is the interior case, and so we add the column of A
-                // to the residual at the next time step.
-                for (lindex nzi = offsets.first; nzi < offsets.second; ++nzi) {
-                    lindex v = lneigh[nzi];
-                    grow_vector_to_index(resid[j+1], v, 0.);
-                    double reold = resid[j+1][v]; 
-                    double renew = reold + update;
-                    sumresid += update;
-                    resid[j+1][v] = renew;
-                    if (renew >= pushcoeff[j+1] && reold < pushcoeff[j+1]) {
-                        Q.push(std::make_pair(v, j+1));
+            
+                // STEP 2: fetch the row
+                fetch_row(i);
+            
+                // find the degree
+                std::pair<lindex, lindex> offsets = lp[i];
+                double degofi = (double)(offsets.second - offsets.first);
+            
+                // update the solution
+                grow_vector_to_index(y, i, 0.);
+                y[i] += rij;
+            
+                resid[j][i] = 0.;
+                sumresid -= rij;
+            
+                double rijs = t*rij/(double)(j+1);
+                double ajv = 1./degofi;
+                double update = rijs*ajv;
+            
+                if (j == N-1) {
+                    // this is the terminal case, and so we add the column of A
+                    // directly to the solution vector y
+                    for (lindex nzi = offsets.first; nzi < offsets.second; ++nzi) {
+                        lindex v = lneigh[nzi];
+                        grow_vector_to_index(y, v, 0.);
+                        y[v] += update;
                     }
+                    npush += degofi;
+                } else {
+                    // this is the interior case, and so we add the column of A
+                    // to the residual at the next time step.
+                    for (lindex nzi = offsets.first; nzi < offsets.second; ++nzi) {
+                        lindex v = lneigh[nzi];
+                        grow_vector_to_index(resid[j+1], v, 0.);
+                        double reold = resid[j+1][v]; 
+                        double renew = reold + update;
+                        sumresid += update;
+                        resid[j+1][v] = renew;
+                        // For this implementation, we need all 
+                        // non-zero residuals in the queue.
+                        if (reold == 0.) {
+                            Q.push( v );
+                        }
+                    }
+                    npush += degofi;
                 }
-                npush += degofi;
-            }
             
-            if (sumresid < eps) { break; }
-            // terminate when Q is empty, i.e. we've pushed all r(i,j) > exp(t)*eps*/(N*n*psi_j(t))
-            if ( Q.size() == 0) { break; }
-        } // end 'while'
+                if (sumresid < eps) { break; }
+                // terminate when Q is empty, i.e. we've pushed all r(i,j) > exp(t)*eps*/(N*n*psi_j(t))
+            }
+        } // end 'for'
         
         
         // store the output back in the solution vector y
