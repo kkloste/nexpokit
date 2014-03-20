@@ -12,65 +12,106 @@
  *  (whereas t=1 must be the case for gexpmq)
  */
 
-#include "mex.h"
-#include <queue>
-#include <vector>
-#include <assert.h>
-#include <math.h>
+#ifndef __APPLE__
+#define __STDC_UTF_16__ 1
+#endif 
 
-/** A replacement for std::queue<int> using a circular buffer array */
-class array_queue {
-    public:
-    size_t max_size;
-    std::vector<int> array;
-    size_t head, tail;
-    size_t cursize;
-    array_queue(size_t _max_size)
-    : max_size(_max_size), array(_max_size), head(0), tail(0), cursize(0)
-    {}
-    
-    void empty() {
-        head = 0;
-        tail = 0;
-        cursize = 0;
+#include <vector>
+#include <queue>
+#include <utility> // for pair sorting
+#include <assert.h>
+#include <limits>
+#include <algorithm>
+#include <math.h>
+#include <sparsehash/dense_hash_map>
+
+#include <mex.h>
+
+#define DEBUGPRINT(x) do { if (debugflag) { \
+mexPrintf x; mexEvalString("drawnow"); } \
+} while (0)
+
+int debugflag = 0;
+
+
+#include <sys/types.h>
+#include <sys/timeb.h>
+#include <sys/time.h>
+double sf_time()
+{
+#if defined(_WIN32) || defined(_WIN64)
+  struct __timeb64 t; _ftime64(&t);
+  return (t.time*1.0 + t.millitm/1000.0);
+#else
+  struct timeval t; gettimeofday(&t, 0);
+  return (t.tv_sec*1.0 + t.tv_usec/1000000.0);
+#endif
+}
+
+struct sparsevec {
+    typedef google::dense_hash_map<mwIndex,double> map_type;
+    map_type map;
+
+    sparsevec() {
+        map.set_empty_key((mwIndex)(-1));
     }
-    
-    size_t size() {
-        return cursize;
-    }
-    
-    void push(int i) {
-        assert(size() < max_size);
-        array[tail] = i;
-        tail ++;
-        if (tail == max_size) {
-            tail = 0;
+    /** Get an element and provide a default value when it doesn't exist
+     * This command does not insert the element into the vector
+     */
+    double get(mwIndex index, double default_value=0.0) {
+        map_type::iterator it = map.find(index);
+        if (it == map.end()) {
+            return default_value;
+        } else {
+            return it->second;
         }
-        cursize ++;
     }
     
-    int front() {
-        assert(size() > 0);
-        return array[head];
-    }
-    
-    void pop() {
-        assert(size() > 0);
-        head ++;
-        if (head == max_size) {
-            head = 0;
+    /** Compute the sum of all the elements
+     * Implements compensated summation
+     */
+    double sum() {
+        double s=0.;
+        for (map_type::iterator it=map.begin(),itend=map.end();it!=itend;++it) {
+            s += it->second;
         }
-        cursize --;
+        return s;
+    }
+    
+    /** Compute the max of the element values
+     * This operation returns the first element if the vector is empty.
+     */
+    mwIndex max_index() {
+        mwIndex index=0;
+        double maxval=std::numeric_limits<double>::min();
+        for (map_type::iterator it=map.begin(),itend=map.end();it!=itend;++it) {
+            if (it->second>maxval) { maxval = it->second; index = it->first; }
+        }
+        return index;
     }
 };
+
+struct sparserow {
+    mwSize n, m;
+    mwIndex *ai;
+    mwIndex *aj;
+    double *a;
+};
+
+
+/**
+ * Returns the degree of node u in sparse graph s
+ */
+mwIndex sr_degree(sparserow *s, mwIndex u) {
+    return (s->ai[u+1] - s->ai[u]);
+}
 
 
 /**
  * Computes the degree N for the Taylor polynomial
  * of exp(tP) to have error less than eps*exp(t)
  *
- * ( so exp(-t(I-P)) has error less than eps 
- *  or exp(tP) has relative error less than eps
+ * ( so exp(-t(I-P)) has error less than eps )
  */
 unsigned int taylordegree(const double t, const double eps) {
     double eps_exp_t = eps*exp(t);
@@ -85,161 +126,311 @@ unsigned int taylordegree(const double t, const double eps) {
     return std::max((int)k, (int)1);
 }
 
-
-/**
- * @param n - sparse matrix size
- * @param cp - sparse matrix column pointer (CSC)
- * @param ari - sparse matrix row index (CSC)
- * @param a - sparse matrix values (CSC)
- * @param c - the column index to approximate (0 <= c < n)
- * @param tol - the stopping tolerance (0 < tol < Inf)
- * @param y - the output vector (length n)
- * @param nsteps - the number of output steps (length 1)
- * @param npushes - the number of total pushes (length 1)
- */
-void gsqres(const mwSize n, const mwIndex* cp, const mwIndex* ari, const double* a,
-            const mwIndex c, const double tol,
-            double* y, double *nsteps, double *npushes)
-{
-    //mexPrintf("Input n=%i N=%i c=%i tol=%i maxsteps=%i\n", n, N, c, tol, maxsteps);
-    double t = 1; // if we want to allow for parameter t in future, just make it a user-input parameter
-    mwIndex N = taylordegree(t,tol);
-    std::vector<double> psivec(N+1,0.);
-    psivec[N] = 1;
-    for (mwIndex k = 1; k <= N ; k++){
-        psivec[N-k] = psivec[N-k+1]*t/(double)(N-k+1) + 1;
-    } // psivec[k] = psi_k(t)
-    double toln = tol/(double)n;
-    for (mwIndex k = 0; k <= N ; k++){
-        psivec[k] = toln/psivec[k];
-    } // psivec[k] = toln/psivec[k]
-    
-    mwIndex M = n*N;
-    
-    // allocate data
-    std::vector<double> rvec(M,0.);
-    double *r = &rvec[0];
-    
-    std::queue<mwIndex> Q;
-    
-    // i is the node index, j is the "step"
-    #define rentry(i,j) ((i)+(j)*n)
-    
-    // mexPrintf("Init...\n");
- 
-    // set the initial residual, add to the heap, and update
-    r[rentry(c,0)] = 1;
-    Q.push(rentry(c,0));
-    
-    mwIndex npush = 0;
-    mwIndex iter = 0;
-    
-    //mexPrintf("Loop...\n");
-    
-    while (1) {
-        
-        /* STEP 1: pop top element off of queue
-         *  * get indices i,j from T
-         *  * add r(i,j) to y(i)
-         *  * set r(i,j) to zero (update sumresid)
-         * STEP 2: get i^th column from A
-         *  * get neighbors of ith node
-         *  * (if j == N-1), add the column to y instead of r.
-         *  * add as a column to next time-step of r, and update queue
-         *  *  (update sumresid)
-         * Check for convegence!
-        */
-        
-        // STEP 1: pop top element off of heap
-        mwIndex ri = Q.front();
-        Q.pop();
-        
-        // decode incides i,j
-        mwIndex i = ri%n;
-        mwIndex j = ri/n;
-        
-        double rij = r[ri];
-        
-        // update yi, zero out residual entry
-        y[i] += rij;
-        r[ri] = 0;
-        double rijs = rij/(double)(j+1);
-        
-        if (j == N-1) {
-            // this is the terminal case, and so we add the column of A 
-            // directly to the solution vector y
-            for (mwIndex nzi=cp[i]; nzi < cp[i+1]; ++nzi) {
-                mwIndex v = ari[nzi];
-                double ajv = a[nzi];
-                y[v] += ajv*rijs;
-            }
-            npush+=cp[i+1]-cp[i];
-        } else {
-            // this is the interior case, and so we add the column of A 
-            // to the residual at the next time step.
-            for (mwIndex nzi=cp[i]; nzi < cp[i+1]; ++nzi) {
-                mwIndex v = ari[nzi];
-                double ajv = a[nzi];
-                mwIndex re = rentry(v,j+1);
-                double reold = r[re];
-                r[re] += ajv*rijs;
-                
-                if (r[re] >= psivec[j+1]) {
-                    if (reold < psivec[j+1]) {
-                        Q.push(re);
-                    }
-                }
-            }
-            npush+=cp[i+1]-cp[i];
-        }
-        iter ++;
-        if ( Q.size() == 0) {
-            *nsteps = (double)iter;
-            break;
-        }
-    }// end "while 1"
-    
-    *npushes = (double)npush;
-    
-    return; // because we "break" out of for loop
-}
-
-void mexFunction(
-  int nargout, mxArray *pargout[],       // these are your outputs
-  int nargin, const mxArray *pargin[])   // these are your arguments
+struct local_stochastic_graph_exponential
 {
     // inputs
-    // A - sparse n-by-n
-    // c - integer scalar 1 <= c <= n
-    // tol - double value, 0 < tol < Inf
-    const mxArray* A = pargin[0];
-    mwSize n = mxGetM(A);
-    mwIndex c = (mwIndex)mxGetScalar(pargin[1])-1;
-    double tol = mxGetScalar(pargin[2]);
+    sparserow* G;
+    double t, eps;
+    
+    // derived
+    mwIndex n, N;
+    std::vector<double> pushcoeff;
+    
+    // the local graphindex
+    typedef unsigned int lindex; 
+    
+    // sentinal
+    const lindex sval; 
+    
+    // the local graph
+    google::dense_hash_map<mwIndex, lindex > imap;
+    lindex nextind;
+    lindex noffset; // offset is next index of lneigh
+                    // that is unused
+    
+    std::vector< lindex > lneigh;                  // local set of neigbhors
+    std::vector< std::pair< lindex, lindex > > lp; // local set of offsets
+    std::vector< mwIndex > gmap;                   // global indices
+    
+    // outputs
+    size_t npush;
+    
+    // data
+    // chosen so initial data is about 256k
+    const static int nstart = 2048;
 
-    pargout[0] = mxCreateDoubleMatrix(n,1,mxREAL);
-    pargout[1] = mxCreateDoubleMatrix(1,1,mxREAL);
-    pargout[2] = mxCreateDoubleMatrix(1,1,mxREAL);
+      
+    local_stochastic_graph_exponential(
+            sparserow* G_, 
+            const double t_, const double eps_) 
+	: G(G_), t(t_), eps(eps_), n(G->n), N(taylordegree(t, eps)),
+            pushcoeff(N+1,0.), sval(std::numeric_limits<lindex>::max()),
+            nextind(0), noffset(0),
+            lneigh(nstart, sval), 
+            lp(nstart, std::make_pair(sval, sval)), 
+            gmap(nstart, (mwIndex)-1), npush(0)
+    {        
+        DEBUGPRINT(("gsqres interior: t=%f eps=%f \n", t, eps));
+        DEBUGPRINT(("gsqres: n=%i N=%i \n", n, N));
+        
+        // initialize the weights for the different residual partitions
+        //  into the vector "pushcoeff"
+        std::vector<double> psivec(N+1,0.);
+        psivec[N] = 1;
+        for (lindex k = 1; k <= N ; k++){
+            psivec[N-k] = psivec[N-k+1]*t/(double)(N-k+1) + 1;
+        } // psivec[k] = psi_k(t)
+
+        pushcoeff[0] = (((exp(t)/(double)n)*eps)/(double)N)/psivec[0];
+        // This is a more numerically stable way to compute
+        //      pushcoeff[j] = exp(t)*eps/(n*N*psivec[j])
+        for (lindex k = 1; k <= N ; k++){
+            pushcoeff[k] = pushcoeff[k-1]*(psivec[k-1]/psivec[k]);
+        }
+        
+        if (n > std::numeric_limits<lindex>::max()) {
+            mexErrMsgIdAndTxt("gsqres_mex:unimplemented", 
+                    "support only up to %i elements", 
+                    std::numeric_limits<lindex>::max());
+        }
+        
+        imap.set_empty_key(sval);        
+    }
     
-    // decode the sparse matrix
-    mwIndex* cp = mxGetJc(A);
-    mwIndex* ri = mxGetIr(A);
-    double* a = mxGetPr(A);
+    template <class T>
+    void grow_vector_to_index(std::vector< T >& vec, lindex ind, T val) {
+        if (ind >= vec.size()) {
+            vec.resize(ind+1, val); 
+        }
+    }
     
-    double* y = mxGetPr(pargout[0]);
-    double* nsteps = mxGetPr(pargout[1]);
-    double* npushes = mxGetPr(pargout[2]);
+    void fetch_row(lindex li) {
+        if (li < lp.size() && lp[li].first != sval) {
+            return;
+        }
+        
+        mwIndex gi = gmap[li];
+        
+        // make sure we have enough room for this one
+        grow_vector_to_index(lp, li, std::make_pair(sval,sval));
+        
+        lindex sindex = noffset;
+        lindex eindex = noffset;
+        lindex deg = sr_degree(G,gi);
+        grow_vector_to_index(lneigh, sindex+deg-1, sval);
+        
+        // copy everything to the local graph
+        for (mwIndex nzi=G->ai[gi]; nzi < G->ai[gi+1]; ++nzi) {
+            lneigh[eindex] = fetch_index(G->aj[nzi]);
+            eindex ++;
+        }
+        lp[li] = std::make_pair(sindex, eindex);
+        noffset = eindex;
+    }
     
-    // mexPrintf("Starting call \n");
+    // fetch the row associated with the given index 
+    // and assign it if it doesn't exist
+    lindex fetch_index(mwIndex gi) {
+        if (imap.count(gi) != 0) {
+            return imap[gi];
+        }
+        lindex li = nextind;
+        nextind ++;
+        imap[gi] = li;
+        grow_vector_to_index(gmap, li, (mwIndex)(-1));
+        gmap[li] = gi;
+        return li;
+    }
     
-    mxAssert(tol > 0 && tol <= 1, "tol must be 0 < tol <= 1");
-    mxAssert(c >= 0 && c < n, "column c must be 1 <= c <= n");
+
+    mwIndex compute(std::vector<mwIndex>& set, sparsevec& yout) {
+        
+        // allocate residuals for each level
+        std::vector< std::vector< double > > resid(N);
+        std::vector< double > y;
+     
+        double sumresid = 0.;
+        std::queue< std::pair<lindex, int> > Q;
+        
+        // set the initial residual, add to the queue
+        for (size_t i=0; i<set.size(); ++i) {
+            mwIndex ri = set[i];
+            lindex li = fetch_index(ri);
+            //rij = value in entry ri of the input vector
+            double rij = 1.;
+            sumresid += rij;
+            grow_vector_to_index(resid[0], li, 0.);
+            resid[0][li] += rij;
+            Q.push(std::make_pair(li, 0));
+        }
+        
+        while (1) {
+            // STEP 1: pop top element off of heap
+            std::pair<lindex, int> rentry = Q.front();
+            Q.pop();
+            // decode incides i,j
+            lindex i = rentry.first;
+            int j = rentry.second;
+            
+            double rij = resid[j][i];
+            
+            if (rij < pushcoeff[j]*(double)n / (double)(nextind)) {
+                // then we shouldn't handle rij now, and should just push this
+                // element back on the queue.
+                Q.push(rentry);
+                continue;
+            }
+            
+            // STEP 2: fetch the row
+            fetch_row(i);
+            
+            // find the degree
+            std::pair<lindex, lindex> offsets = lp[i];
+            double degofi = (double)(offsets.second - offsets.first);
+            
+            // update the solution
+            grow_vector_to_index(y, i, 0.);
+            y[i] += rij;
+            
+            resid[j][i] = 0.;
+            sumresid -= rij;
+            
+            double rijs = t*rij/(double)(j+1);
+            double ajv = 1./degofi;
+            double update = rijs*ajv;
+            
+            if ((lindex)j == N-1) {
+                // this is the terminal case, and so we add the column of A
+                // directly to the solution vector y
+                for (lindex nzi = offsets.first; nzi < offsets.second; ++nzi) {
+                    lindex v = lneigh[nzi];
+                    grow_vector_to_index(y, v, 0.);
+                    y[v] += update;
+                }
+                npush += degofi;
+            } else {
+                // this is the interior case, and so we add the column of A
+                // to the residual at the next time step.
+                for (lindex nzi = offsets.first; nzi < offsets.second; ++nzi) {
+                    lindex v = lneigh[nzi];
+                    grow_vector_to_index(resid[j+1], v, 0.);
+                    double reold = resid[j+1][v]; 
+                    double renew = reold + update;
+                    sumresid += update;
+                    resid[j+1][v] = renew;
+                    if (renew >= pushcoeff[j+1] && reold < pushcoeff[j+1]) {
+                        Q.push(std::make_pair(v, j+1));
+                    }
+                }
+                npush += degofi;
+            }
+            
+            if (sumresid < eps) { break; }
+            // terminate when Q is empty, i.e. we've pushed all r(i,j) > exp(t)*eps*/(N*n*psi_j(t))
+            if ( Q.size() == 0) { break; }
+        } // end 'while'
+        
+        
+        // store the output back in the solution vector y
+        for (lindex i=0; i<y.size(); ++i) {
+            if (y[i] > 0) {
+                yout.map[gmap[i]] = y[i];
+            }
+        }
+        
+        return npush;
+    }  
+};
+
+
     
-    gsqres(n, cp, ri, a, // sparse matrix
-           c, tol,  // parameters
-           y, nsteps, npushes);
+
+
+void copy_array_to_index_vector(const mxArray* v, std::vector<mwIndex>& vec)
+{
+    mxAssert(mxIsDouble(v), "array type is not double");
+    size_t n = mxGetNumberOfElements(v);
+    double *p = mxGetPr(v);
     
+    vec.resize(n);
+    
+    for (size_t i=0; i<n; ++i) {
+        double elem = p[i];
+        mxAssert(elem >= 1, "Only positive integer elements allowed");
+        vec[i] = (mwIndex)elem - 1;
+    }
 }
+
+
+// USAGE
+// [y npushes] = gsqres_mex(A,set,eps,t,debugflag)
+void mexFunction(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])
+{
+    if (nrhs < 2 || nrhs > 5) {
+        mexErrMsgIdAndTxt("gsqres_mex:wrongNumberArguments",
+                          "gsqres_mex needs two to five arguments, not %i", nrhs);
+    }
+    if ( nlhs > 2 ){
+        mexErrMsgIdAndTxt("gsqres_mex:wrongNumberOutputs",
+                          "gsqres_mex needs two outputs, not %i", nlhs);
+    }
     
+    if (nrhs == 5) {
+        debugflag = (int)mxGetScalar(prhs[4]);
+    }
+    DEBUGPRINT(("gsqres_mex: preprocessing start: \n"));
     
-  
+    const mxArray* mat = prhs[0];
+    const mxArray* set = prhs[1];
+    
+    if ( mxIsSparse(mat) == false ){
+        mexErrMsgIdAndTxt("gsqres_mex:wrongInputMatrix",
+                          "gsqres_mex needs sparse input matrix");
+    }
+    if ( mxGetM(mat) != mxGetN(mat) ){
+        mexErrMsgIdAndTxt("gsqres_mex:wrongInputMatrixDimensions",
+                          "gsqres_mex needs square input matrix");
+    }
+    
+    double npushesmem = 0.;
+    double* npushes = &npushesmem;
+    if (nlhs > 1){
+        plhs[1] = mxCreateDoubleMatrix(1,1,mxREAL);
+        npushes = mxGetPr(plhs[1]);
+    }
+    
+    double eps = pow(10,-5);
+    double t = 1.;
+
+    if (nrhs >= 4) { t = mxGetScalar(prhs[3]); }
+    if (nrhs >= 3) { eps = mxGetScalar(prhs[2]); }
+    
+    sparserow G;
+    G.m = mxGetM(mat);
+    G.n = mxGetN(mat);
+    G.ai = mxGetJc(mat);
+    G.aj = mxGetIr(mat);
+    G.a = mxGetPr(mat);
+    
+    std::vector< mwIndex > seeds;
+    copy_array_to_index_vector( set, seeds );
+    sparsevec hk;
+    
+    DEBUGPRINT(("gsqres_mex: preprocessing end: \n"));
+    
+    //gexpmq(&G, seeds, hk, t, eps, npushes);
+    local_stochastic_graph_exponential c(&G, t, eps);
+    *npushes = c.compute(seeds, hk);
+
+    DEBUGPRINT(("gsqres_mex: call to gsqres() done\n"));
+
+    if (nlhs > 0) { // sets output "hk" to the heat kernel vector computed
+        mxArray* hkvec = mxCreateDoubleMatrix(G.n,1,mxREAL);
+        plhs[0] = hkvec;
+        double *ci = mxGetPr(hkvec);
+        for (sparsevec::map_type::iterator it=hk.map.begin(),itend=hk.map.end();
+             it!=itend;++it) {
+            ci[it->first] = it->second;
+        }
+    }
+}
