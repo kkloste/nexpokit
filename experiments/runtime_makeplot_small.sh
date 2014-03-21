@@ -10,9 +10,7 @@ chmod 744 *.sh
 chmod 744 *.m
 
 echo Collect the runtime data from all experiments and process it
-/p/matlab-7.14/bin/matlab -nodisplay -nodesktop -nojvm -nosplash -r runtime_process_small > runtime_procsm.txt
-
-echo Make the plots
-/p/matlab-7.14/bin/matlab -nodisplay -nodesktop -nojvm -nosplash -r runtime_plot > runtime_plot.txt
+echo Then make the plots
+/p/matlab-7.14/bin/matlab -nodisplay -nodesktop -nojvm -nosplash -r runtime_plot_small > runtime_plot.txt
 
 echo Plot made!
