@@ -1,9 +1,9 @@
 #!/bin/bash
 
 # to call this shell script, use this:
-# ./runtime_makeplot.sh
+# ./runtime_makeplot_small.sh
 clear
-echo Nexpokit runtime plot
+echo Nexpokit runtime small plot
 
 # change permissions to ensure this script can run everything it's supposed to
 chmod 744 *.sh
