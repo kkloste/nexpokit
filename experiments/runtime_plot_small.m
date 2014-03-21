@@ -1,4 +1,3 @@
-% combine the data from the smaller graphs with twitter and friendster
 
 experimentname = 'runtime_small';
 addpath('~/nexpokit');

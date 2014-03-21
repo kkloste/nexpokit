@@ -19,3 +19,5 @@ echo Then make the plots
 /p/matlab-7.14/bin/matlab -nodisplay -nodesktop -nosplash -r runtime_plot_small > runsmsmall.txt
 
 echo Plot made!
+
+rm runsmsmall.txt
