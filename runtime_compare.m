@@ -17,7 +17,6 @@ err_vals = zeros(num_trials, num_algs);
 
 fprintf('\n Num of trials = %i \t dataset = %s \t tol = %5.8f \t maxnnz = %i',num_trials, dataset, tol, maxnnz);
 heading = '\n Algorithm = expmv \t gsqres \t gexpmq \t gexpm_hash \t expm_svec';
-% '\n Algorithm = expmv \t gsqres \t gexpmq \t hpexpm \t expm_svec \n'
 fprintf(heading);
 for trial=1:num_trials
 fprintf('\n\n trial num = %i',trial);
@@ -25,7 +24,7 @@ fprintf('\n\n trial num = %i',trial);
     ec = eyei(n,ind);
 
 alg_num = 1;
-    tic; [x_true,s,m,mv,mvd] = expmv(t,P,ec,[],'half'); time_vals(trial,alg_num) = toc;
+    tic; [x_true,s,m,mv,mvd] = expmv(t,P,ec,[],'single'); time_vals(trial,alg_num) = toc;
     normtrue = norm(x_true,1); %[vtrue strue] = sort(x_true, 'descend');
 fprintf('\n time = %8.7f', time_vals(trial,alg_num));
         
@@ -42,8 +41,6 @@ fprintf('\t %8.7f', time_vals(trial,alg_num));
 alg_num = 4;
     tic; [y hpush hstep] = gexpm_hash_mex(P,ind,tol,t); time_vals(trial,alg_num) = toc;
     err_vals(trial,alg_num) = norm(x_true - y,1)/normtrue;
-%    tic; y = hpexpm_mex(P,ind,tol,t,maxnnz); time_vals(trial,alg_num) = toc;
-%    err_vals(trial,alg_num) = norm(x_true - y,1)/normtrue;
 fprintf('\t %8.7f', time_vals(trial,alg_num));
 
 alg_num = 5;
