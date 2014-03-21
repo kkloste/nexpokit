@@ -16,6 +16,6 @@ echo finished calling all experiments
 
 echo Collect the runtime data from all experiments and process it
 echo Then make the plots
-/p/matlab-7.14/bin/matlab -nodisplay -nodesktop -nojvm -nosplash -r runtime_plot_small > runsmsmall.txt
+/p/matlab-7.14/bin/matlab -nodisplay -nodesktop -nosplash -r runtime_plot_small > runsmsmall.txt
 
 echo Plot made!

@@ -82,5 +82,4 @@ legend boxoff;
 set_figure_size([5,3]);
 print(gcf,strcat(experimentname,'.eps'),'-depsc2');
 
-	
-%exit
+exit
