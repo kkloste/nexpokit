@@ -40,9 +40,10 @@ int debugflag = 0;
  * @param nsteps - the number of output steps (length 1)
  */
 void gexpmq(const mwSize n, const mwIndex* cp, const mwIndex* ari, const double* a, 
-            const mwIndex c, const double t,  const double tol, const mwIndex maxsteps, 
+            const mwIndex c, const double t,  const double eps, const mwIndex maxsteps, 
             double* y, double *nsteps, double *npushes)
 {
+	double tol = eps;
 	mwIndex N = (mwIndex)taylordegree(t,tol);
 DEBUGPRINT(("Input n=%i N=%i c=%i tol=%i maxsteps=%i\n", n, N, c, tol, maxsteps));
     mwIndex M = n*N;

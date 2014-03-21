@@ -21,6 +21,7 @@
 #include <math.h>
 
 #include "sparseheap.hpp" // include our heap functions
+#include "taydeg.hpp"
 
 #include "mex.h"
 
@@ -73,27 +74,6 @@ struct sparsevec {
     }
 };
 
-
-/**
- * Computes the degree N for the Taylor polynomial
- * of exp(tP) to have error less than eps*exp(t)
- *
- * ( so exp(-t(I-P)) has error less than eps )
- */
-unsigned int taylordegree(const double t, const double eps) {
-    double eps_exp_t = eps*exp(t);
-    double error = exp(t)-1;
-    double last = 1.;
-    double k = 0.;
-    while(error > eps_exp_t){
-        k = k + 1.;
-        last = (last*t)/k;
-        error = error - last;
-    }
-    return std::max((int)k, (int)1);
-}
-
-
 struct sparserow {
     mwSize n, m;
     mwIndex *ai;
@@ -124,9 +104,10 @@ mwIndex sr_degree(sparserow *s, mwIndex u) {
  */
 
 void gexpm(sparserow* G, std::vector<mwIndex>& set, sparsevec& y,
-           const double t, const double eps,
+           const double t, const double tol,
            double* npushes, double* nsteps, const mwIndex maxsteps)
 {
+	double eps = tol;
     mwIndex N = taylordegree(t,eps);
     mwIndex n = G->n;
 

@@ -25,6 +25,8 @@
 #include <math.h>
 #include <sparsehash/dense_hash_map>
 
+#include "taydeg.hpp"
+
 #include <mex.h>
 
 #define DEBUGPRINT(x) do { if (debugflag) { \
@@ -106,26 +108,6 @@ mwIndex sr_degree(sparserow *s, mwIndex u) {
     return (s->ai[u+1] - s->ai[u]);
 }
 
-
-/**
- * Computes the degree N for the Taylor polynomial
- * of exp(tP) to have error less than eps*exp(t)
- *
- * ( so exp(-t(I-P)) has error less than eps )
- */
-unsigned int taylordegree(const double t, const double eps) {
-    double eps_exp_t = eps*exp(t);
-    double error = exp(t)-1;
-    double last = 1.;
-    double k = 0.;
-    while(error > eps_exp_t){
-        k = k + 1.;
-        last = (last*t)/k;
-        error = error - last;
-    }
-    return std::max((int)k, (int)1);
-}
-
 struct local_stochastic_graph_exponential
 {
     // inputs
@@ -162,7 +144,7 @@ struct local_stochastic_graph_exponential
       
     local_stochastic_graph_exponential(
             sparserow* G_, 
-            const double t_, const double eps_) 
+            const double t_, double eps_) 
 	: G(G_), t(t_), eps(eps_), n(G->n), N(taylordegree(t, eps)),
             pushcoeff(N+1,0.), sval(std::numeric_limits<lindex>::max()),
             nextind(0), noffset(0),
