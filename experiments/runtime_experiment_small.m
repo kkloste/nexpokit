@@ -9,12 +9,12 @@ addpath('~/nexpokit');
 
 
 num_data = numel(datalist);
-num_trials = 100;
+num_trials = 10;
 num_algs = numel(alglist);
 
 disp(experimentname);
 maxnnz = 10000;
-tol = 1e-4;
+tol = 2*1e-4;
 t = 1;
 
 format shortg;
