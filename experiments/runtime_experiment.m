@@ -3,13 +3,13 @@ experimentname = 'runtime';
 
 datalist = { 'itdk0304-cc', 'dblp-cc', 'flickr-bidir-cc', 'ljournal-2008'}
 % 'twitter-2010', 'com-friendster'};
-alglist = { 'expmv', 'half', 'gsqres', 'gexpmq', 'gexpm_hash', 'expm_svec'};
+alglist = { 'expmv', 'half', 'gexpmq', 'gexpm', 'expmimv'};
 
 addpath('~/nexpokit');
 
 
 num_data = numel(datalist);
-num_trials = 5;
+num_trials = 10;
 num_algs = numel(alglist);
 
 disp(experimentname);
@@ -78,11 +78,11 @@ for dataindex = 1:num_data
 			err_vals(alg_num, trial, dataindex) = norm(x_true - y,1)/normtrue;
 			fprintf('\t %f', time_vals(alg_num, trial, dataindex));
 		
-		alg_num = alg_num + 1;
-			tic; [y nstep npush] = gexpmq_mex(P,ind,tol,t);
-			time_vals(alg_num, trial, dataindex) = toc;
-			err_vals(alg_num, trial, dataindex) = norm(x_true - y,1)/normtrue;
-			fprintf('\t %f', time_vals(alg_num, trial, dataindex));
+%		alg_num = alg_num + 1;
+%			tic; [y nstep npush] = gexpmq_mex(P,ind,tol,t);
+%			time_vals(alg_num, trial, dataindex) = toc;
+%			err_vals(alg_num, trial, dataindex) = norm(x_true - y,1)/normtrue;
+%			fprintf('\t %f', time_vals(alg_num, trial, dataindex));
 
 		alg_num = alg_num + 1;
 			tic; [y hpush hstep] = gexpm_hash_mex(P,ind,tol,t);

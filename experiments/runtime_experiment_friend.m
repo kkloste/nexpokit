@@ -3,7 +3,7 @@ experimentname = 'runtime_friendster';
 
 datalist = {'com-friendster'};
 % alglist = { 'expmv', 'half', 'gsqres', 'gexpmq', 'expm_svec'};
-alglist = { 'expmv', 'half', 'gsqres', 'gexpmq', 'gexpm_hash', 'expm_svec'};
+alglist = { 'expmv', 'half', 'gexpmq', 'gexpm', 'expmimv'};
 
 addpath('~/nexpokit');
 
@@ -79,13 +79,13 @@ for dataindex = 1:num_data
 			err_vals(alg_num, trial, dataindex) = norm(x_true - y,1)/normtrue;
 			fprintf('\t %f', time_vals(alg_num, trial, dataindex));
 		
-		alg_num = alg_num + 1;
-			tic; [y nstep npush] = gexpmq_mex(P,ind,tol,t);
-			time_vals(alg_num, trial, dataindex) = toc;
-			err_vals(alg_num, trial, dataindex) = norm(x_true - y,1)/normtrue;
-			fprintf('\t %f', time_vals(alg_num, trial, dataindex));
+%		alg_num = alg_num + 1;
+%			tic; [y nstep npush] = gexpmq_mex(P,ind,tol,t);
+%			time_vals(alg_num, trial, dataindex) = toc;
+%			err_vals(alg_num, trial, dataindex) = norm(x_true - y,1)/normtrue;
+%			fprintf('\t %f', time_vals(alg_num, trial, dataindex));
 
-		alg_num = alg_num + 1;
+%		alg_num = alg_num + 1;
 %			tic; [y hpush hstep] = gexpm_hash_mex(P,ind,tol,t);
 %			time_vals(alg_num, trial, dataindex) = toc;
 %			err_vals(alg_num, trial, dataindex) = norm(x_true - y,1)/normtrue;
