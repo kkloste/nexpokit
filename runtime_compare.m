@@ -9,7 +9,7 @@ maxnnz = 10000;
 tol = 1e-4;
 t = 1;
 num_trials = 5;
-num_algs = 4;
+num_algs = 5;
 
 seeds = randi(n,num_trials,1);
 time_vals = zeros(num_trials,num_algs);
