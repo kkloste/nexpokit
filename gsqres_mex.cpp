@@ -241,7 +241,7 @@ struct local_stochastic_graph_exponential
             lindex li = fetch_index(ri);
             //rij = value in entry ri of the input vector
             double rij = 1.;
-            sumresid += rij;
+            sumresid += rij*psivec[0];;
             grow_vector_to_index(resid[0], li, 0.);
             resid[0][li] += rij;
             Q.push( li );
@@ -280,7 +280,7 @@ struct local_stochastic_graph_exponential
                 y[i] += rij;
             
                 resid[j][i] = 0.;
-                sumresid -= rij;
+                sumresid -= rij*psivec[j];;
             
                 double rijs = t*rij/(double)(j+1);
                 double ajv = 1./degofi;
@@ -303,7 +303,7 @@ struct local_stochastic_graph_exponential
                         grow_vector_to_index(resid[j+1], v, 0.);
                         double reold = resid[j+1][v]; 
                         double renew = reold + update;
-                        sumresid += update;
+                        sumresid += update*psivec[j+1];;
                         resid[j+1][v] = renew;
                         // For this implementation, we need all 
                         // non-zero residuals in the queue.
@@ -314,7 +314,7 @@ struct local_stochastic_graph_exponential
                     npush += degofi;
                 }
             
-                if (sumresid < eps) { break; }
+                if (sumresid < eps*exp(t)) { break; }
                 // terminate when Q is empty, i.e. we've pushed all r(i,j) > exp(t)*eps*/(N*n*psi_j(t))
             }
         } // end 'for'
