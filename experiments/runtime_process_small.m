@@ -22,31 +22,31 @@ graphsizes = datasizes;
 
 numrecords = num_graphs;
 
-  % now load twitter
-  	load(strcat('~/nexpokit/results/' , experimentname, '_twitter'));
-  
-  	errors(:,:,end:end+numel(datasizes)) = 0;
-  	times(:,:,end:end+numel(datasizes)) = 0;
-  	graphsizes(end:end+numel(datasizes),1) = 0;
-  
-  	errors(:,:,numrecords:end) = err_vals(:,:,:);
-  	times(:,:,numrecords:end) = time_vals(:,:,:);
-  	graphsizes(numrecords:end,1) = datasizes(:);
-  
-  	numrecords = numrecords + numel(datasizes);
-  
-  % now load friendster
-  	load(strcat('~/nexpokit/results/' , experimentname, '_friend'));
-  
-  	errors(:,:,end:end+numel(datasizes)) = 0;
-  	times(:,:,end:end+numel(datasizes)) = 0;
-  	graphsizes(end:end+numel(datasizes),1) = 0;
-  
-  	errors(:,:,numrecords:end) = err_vals(:,:,:);
-  	times(:,:,numrecords:end) = time_vals(:,:,:);
-  	graphsizes(numrecords:end,1) = datasizes(:);
-  
-  	numrecords = numrecords + numel(datasizes);
+%  % now load twitter
+%  	load(strcat('~/nexpokit/results/' , experimentname, '_twitter'));
+%  
+%  	errors(:,:,end:end+numel(datasizes)) = 0;
+%  	times(:,:,end:end+numel(datasizes)) = 0;
+%  	graphsizes(end:end+numel(datasizes),1) = 0;
+%  
+%  	errors(:,:,numrecords:end) = err_vals(:,:,:);
+%  	times(:,:,numrecords:end) = time_vals(:,:,:);
+%  	graphsizes(numrecords:end,1) = datasizes(:);
+%  
+%  	numrecords = numrecords + numel(datasizes);
+%  
+%  % now load friendster
+%  	load(strcat('~/nexpokit/results/' , experimentname, '_friend'));
+%  
+%  	errors(:,:,end:end+numel(datasizes)) = 0;
+%  	times(:,:,end:end+numel(datasizes)) = 0;
+%  	graphsizes(end:end+numel(datasizes),1) = 0;
+%  
+%  	errors(:,:,numrecords:end) = err_vals(:,:,:);
+%  	times(:,:,numrecords:end) = time_vals(:,:,:);
+%  	graphsizes(numrecords:end,1) = datasizes(:);
+%  
+%  	numrecords = numrecords + numel(datasizes);
 	
 	
 % errors ( num_algs, num_trials, num_data )
