@@ -230,6 +230,13 @@ struct local_stochastic_graph_exponential
         // allocate residuals for each level
         std::vector< std::vector< double > > resid(N);
         std::vector< double > y;
+
+	// this is defined earlier, but outside the scope of compute(), so I redefine it here
+        std::vector<double> psivec(N+1,0.);
+        psivec[N] = 1;
+        for (lindex k = 1; k <= N ; k++){
+            psivec[N-k] = psivec[N-k+1]*t/(double)(N-k+1) + 1;
+        } // psivec[k] = psi_k(t)
      
         double sumresid = 0.;
         // the queue stores the entries for the next time step
