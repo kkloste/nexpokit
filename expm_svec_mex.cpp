@@ -172,7 +172,6 @@ void expm_svec(sparserow* G, std::vector<mwIndex>& set, sparsevec& y,
         y.map[ri] = rij;
     }
     
-    mwIndex oldhsize = 0;
     sparsevec dummy; // dummy temporarily holds A*y
     //    tree_map T;
     std::vector<mwIndex> Tvec(maxnnz,0);
@@ -239,7 +238,6 @@ void expm_svec(sparserow* G, std::vector<mwIndex>& set, sparsevec& y,
             y.map[ri] = y.get(ri) + rij;
         }
         *npushes += set.size();
-        oldhsize = hsize;
     }//terms of Taylor are complete
     return;
 }
