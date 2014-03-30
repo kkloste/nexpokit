@@ -1,7 +1,7 @@
 
 experimentname = 'runtime_small';
 
-datalist = { 'itdk0304-cc', 'dblp-cc', 'flickr-bidir-cc', 'ljournal-2008'}
+datalist = { 'itdk0304-cc', 'dblp-cc', 'flickr-scc', 'ljournal-2008'}
 
 alglist = { 'expmv', 'half', 'gexpmq', 'gexpm', 'expmimv'};
 

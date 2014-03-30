@@ -1,8 +1,7 @@
 
 experimentname = 'runtime';
 
-datalist = { 'itdk0304-cc', 'dblp-cc', 'flickr-bidir-cc', 'ljournal-2008'}
-% 'twitter-2010', 'com-friendster'};
+datalist = { 'itdk0304-cc', 'dblp-cc', 'flickr-scc', 'ljournal-2008'}
 alglist = { 'expmv', 'half', 'gexpmq', 'gexpm', 'expmimv'};
 
 addpath('~/nexpokit');
