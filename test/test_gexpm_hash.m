@@ -9,6 +9,5 @@ debugflag=0;
 for j=1:50%size(P,1)
     [x_true,s,m,mv,mvd] = expmv(1,P,eyei(n,j),[],'single');
     [y npush nstep] = gexpm_hash_mex(P,j,tol,t,debugflag); % this should be full accuracy
-    %assert(norm(y-Z(:,j),1)/norm(Z(:,j),1) <= tol, sprintf('failed on column %i of netscience ', j))
     assert(norm(y-x_true,1)/norm(x_true,1) <= tol, sprintf('failed on column %i of netscience ', j))
 end
