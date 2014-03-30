@@ -183,6 +183,8 @@ void expm_svec(sparserow* G, std::vector<mwIndex>& set, sparsevec& y,
     for (mwIndex k=0; k <= N-1 ; k++){
         mwIndex hsize = 0;
 
+        // (1) MAKE HEAP
+        //      For each entry of y, check if we put it in the heap.
         for (map_type::iterator it=y.map.begin(),itend=y.map.end();it!=itend;++it) {
             mwIndex ind = it->first;
             double valind = it->second;
@@ -209,7 +211,6 @@ void expm_svec(sparserow* G, std::vector<mwIndex>& set, sparsevec& y,
                 }
             }
         }// END FOR
-        
         
         y.map.clear();
         
