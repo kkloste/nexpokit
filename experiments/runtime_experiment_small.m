@@ -2,19 +2,19 @@
 experimentname = 'runtime_small';
 
 datalist = { 'itdk0304-cc', 'dblp-cc', 'flickr-bidir-cc', 'ljournal-2008'}
-% 'twitter-2010', 'com-friendster'};
+
 alglist = { 'expmv', 'half', 'gexpmq', 'gexpm', 'expmimv'};
 
 addpath('~/nexpokit');
 
 
 num_data = numel(datalist);
-num_trials = 10;
+num_trials = 100;
 num_algs = numel(alglist);
 
 disp(experimentname);
 maxnnz = 10000;
-tol = 2*1e-4;
+tol = 1e-4;
 t = 1;
 
 format shortg;
