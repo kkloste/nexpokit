@@ -1,7 +1,7 @@
 
 experimentname = 'runtime_twitter';
 
-datalist = {'twitter-2010'};
+datalist = {'twitter_rv-scc'};
 % alglist = { 'expmv', 'half', 'gsqres', 'gexpmq', 'expm_svec'};
 alglist = { 'expmv', 'half', 'gexpmq', 'gexpm', 'expmimv'};
 
