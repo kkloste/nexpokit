@@ -25,6 +25,8 @@
 #include <math.h>
 #include <sparsehash/dense_hash_map>
 
+#include "taydeg.hpp"
+
 #include <mex.h>
 
 #define DEBUGPRINT(x) do { if (debugflag) { \
@@ -106,26 +108,6 @@ mwIndex sr_degree(sparserow *s, mwIndex u) {
     return (s->ai[u+1] - s->ai[u]);
 }
 
-
-/**
- * Computes the degree N for the Taylor polynomial
- * of exp(tP) to have error less than eps*exp(t)
- *
- * ( so exp(-t(I-P)) has error less than eps )
- */
-unsigned int taylordegree(const double t, const double eps) {
-    double eps_exp_t = eps*exp(t);
-    double error = exp(t)-1;
-    double last = 1.;
-    double k = 0.;
-    while(error > eps_exp_t){
-        k = k + 1.;
-        last = (last*t)/k;
-        error = error - last;
-    }
-    return std::max((int)k, (int)1);
-}
-
 struct local_stochastic_graph_exponential
 {
     // inputs
@@ -162,7 +144,7 @@ struct local_stochastic_graph_exponential
       
     local_stochastic_graph_exponential(
             sparserow* G_, 
-            const double t_, const double eps_) 
+            const double t_, double eps_) 
 	: G(G_), t(t_), eps(eps_), n(G->n), N(taylordegree(t, eps)),
             pushcoeff(N+1,0.), sval(std::numeric_limits<lindex>::max()),
             nextind(0), noffset(0),
@@ -248,6 +230,13 @@ struct local_stochastic_graph_exponential
         // allocate residuals for each level
         std::vector< std::vector< double > > resid(N);
         std::vector< double > y;
+
+	// this is defined earlier, but outside the scope of compute(), so I redefine it here
+        std::vector<double> psivec(N+1,0.);
+        psivec[N] = 1;
+        for (lindex k = 1; k <= N ; k++){
+            psivec[N-k] = psivec[N-k+1]*t/(double)(N-k+1) + 1;
+        } // psivec[k] = psi_k(t)
      
         double sumresid = 0.;
         // the queue stores the entries for the next time step
@@ -259,7 +248,7 @@ struct local_stochastic_graph_exponential
             lindex li = fetch_index(ri);
             //rij = value in entry ri of the input vector
             double rij = 1.;
-            sumresid += rij;
+            sumresid += rij*psivec[0];;
             grow_vector_to_index(resid[0], li, 0.);
             resid[0][li] += rij;
             Q.push( li );
@@ -298,7 +287,7 @@ struct local_stochastic_graph_exponential
                 y[i] += rij;
             
                 resid[j][i] = 0.;
-                sumresid -= rij;
+                sumresid -= rij*psivec[j];;
             
                 double rijs = t*rij/(double)(j+1);
                 double ajv = 1./degofi;
@@ -321,7 +310,7 @@ struct local_stochastic_graph_exponential
                         grow_vector_to_index(resid[j+1], v, 0.);
                         double reold = resid[j+1][v]; 
                         double renew = reold + update;
-                        sumresid += update;
+                        sumresid += update*psivec[j+1];;
                         resid[j+1][v] = renew;
                         // For this implementation, we need all 
                         // non-zero residuals in the queue.
@@ -332,7 +321,7 @@ struct local_stochastic_graph_exponential
                     npush += degofi;
                 }
             
-                if (sumresid < eps) { break; }
+                if (sumresid < eps*exp(t)) { break; }
                 // terminate when Q is empty, i.e. we've pushed all r(i,j) > exp(t)*eps*/(N*n*psi_j(t))
             }
         } // end 'for'

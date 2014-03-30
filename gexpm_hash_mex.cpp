@@ -21,6 +21,7 @@
 #include <math.h>
 
 #include "sparseheap.hpp" // include our heap functions
+#include "taydeg.hpp"
 
 #include "mex.h"
 
@@ -73,27 +74,6 @@ struct sparsevec {
     }
 };
 
-
-/**
- * Computes the degree N for the Taylor polynomial
- * of exp(tP) to have error less than eps*exp(t)
- *
- * ( so exp(-t(I-P)) has error less than eps )
- */
-unsigned int taylordegree(const double t, const double eps) {
-    double eps_exp_t = eps*exp(t);
-    double error = exp(t)-1;
-    double last = 1.;
-    double k = 0.;
-    while(error > eps_exp_t){
-        k = k + 1.;
-        last = (last*t)/k;
-        error = error - last;
-    }
-    return std::max((int)k, (int)1);
-}
-
-
 struct sparserow {
     mwSize n, m;
     mwIndex *ai;
@@ -124,11 +104,18 @@ mwIndex sr_degree(sparserow *s, mwIndex u) {
  */
 
 void gexpm(sparserow* G, std::vector<mwIndex>& set, sparsevec& y,
-           const double t, const double eps,
+           const double t, const double tol,
            double* npushes, double* nsteps, const mwIndex maxsteps)
 {
-    mwIndex N = taylordegree(t,eps);
+	double eps = tol;
+    mwIndex N = taylordegree(t,eps); // computes N and alters eps
     mwIndex n = G->n;
+
+    std::vector<double> psivec(N+1,0.);
+    psivec[N] = 1;
+    for (mwIndex k = 1; k <= N ; k++){
+        psivec[N-k] = psivec[N-k+1]*t/(double)(N-k+1) + 1;
+    } // psivec[k] = psi_k(t)
 
     DEBUGPRINT( ("Input n=%i N=%i tol=%f maxsteps=%i\n", n, N, eps, maxsteps) );
     
@@ -147,7 +134,7 @@ void gexpm(sparserow* G, std::vector<mwIndex>& set, sparsevec& y,
     for (size_t i=0; i<set.size(); ++i) {
         ri = set[i];
         rij = 1.;
-        sumresid += rij;
+        sumresid += rij*psivec[0];
         r.update(rentry(ri,0),rij); // "update" handles the heap as well
     }
     DEBUGPRINT(("gexpm_hash: hsize = %i \n", r.hsize));
@@ -170,12 +157,12 @@ void gexpm(sparserow* G, std::vector<mwIndex>& set, sparsevec& y,
         // "extractmax" sets the entry to 0, stores the value in rij,
         // the index in ri, removes the entry from the heap, then reheaps.
         ri = r.extractmax(rij);
-        sumresid -= rij;
 DEBUGPRINT(("gexpm_hash: hsize = %i , iter = %i,  sumresid = %.8f,  rij = %.8f \n", r.hsize, iter, sumresid, rij));
         // decode incides i,j
         mwIndex i = ri%n;
         mwIndex j = ri/n;
-
+        sumresid -= rij*psivec[j];
+        
         // update yi
         y.map[i] += rij;
 
@@ -200,7 +187,7 @@ DEBUGPRINT(("gexpm_hash: hsize = %i , iter = %i,  sumresid = %.8f,  rij = %.8f \
                 mwIndex re = rentry(v,j+1);
                 r.update(re,update); // handles the heap internally
                 //                r[re] += ajv*rijs;
-                sumresid += update;
+                sumresid += update*psivec[j+1];             
             }
             *npushes += degofi;
         }
