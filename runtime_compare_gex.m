@@ -13,6 +13,7 @@ tol = 1e-4;
 t = 1;
 num_trials = 10;
 num_algs = 5;
+rand('state',0);
 seeds = randi(n,num_trials,1);
 time_vals = zeros(num_trials,num_algs);
 err_vals = zeros(num_trials, num_algs);
