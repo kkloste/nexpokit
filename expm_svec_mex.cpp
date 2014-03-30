@@ -186,22 +186,6 @@ void expm_svec(sparserow* G, std::vector<mwIndex>& set, sparsevec& y,
 
         // (1) MAKE HEAP
         //      For each entry of y, check if we put it in the heap.
-        //      Start by seeing if any of the entries from the last heap
-        //      go into this one -- loading the biggest entries in first
-        //      will minimize the number of heap updates made
-        for (mwIndex hind = 0; hind < oldhsize ; hind++){
-            mwIndex ind = T[hind];
-            double valind = y.get(ind);
-            // if the value is nonzero, we might add it to heap
-            if (valind > 0) {
-                // place y[ind] at back of heap, then heap_up
-                T[hsize] = ind;
-                d[hsize] = valind;
-                hsize++;
-                heap_up(hsize-1, hsize, T, d);
-            }
-            y.map.erase(ind);
-        }
         for (map_type::iterator it=y.map.begin(),itend=y.map.end();it!=itend;++it) {
             mwIndex ind = it->first;
             double valind = it->second;
@@ -228,7 +212,6 @@ void expm_svec(sparserow* G, std::vector<mwIndex>& set, sparsevec& y,
                 }
             }
         }// END FOR
-        
         
         y.map.clear();
         
