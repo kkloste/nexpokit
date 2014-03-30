@@ -1,7 +1,7 @@
 dataset = 'ljournal-2008';
 A = load_graph(dataset, '/scratch2/dgleich/kyle/data');
 
-P = colnormout(A);
+P = normout(A)';
 clear A;
 
 save(['/scratch2/dgleich/kyle/colstochdata/' dataset '.mat'],'P','-v7.3');
