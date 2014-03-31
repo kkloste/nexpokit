@@ -1,6 +1,6 @@
 experimentname = 'runtime_webbase';
 
-datalist = {'sccwebbase-2001'};
+datalist = {'webbase-2001'};
 alglist = { 'expmv', 'half', 'gexpmq', 'gexpm', 'expmimv'};
 
 addpath('~/nexpokit');
