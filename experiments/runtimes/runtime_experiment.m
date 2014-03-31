@@ -1,4 +1,3 @@
-
 experimentname = 'runtime';
 
 datalist = { 'itdk0304-cc', 'dblp-cc', 'flickr-scc', 'ljournal-2008'}
@@ -8,13 +7,18 @@ addpath('~/nexpokit');
 
 
 num_data = numel(datalist);
-num_trials = 10;
+num_trials = 2;
 num_algs = numel(alglist);
 
 disp(experimentname);
 maxnnz = 10000;
 tol = 1e-4;
 t = 1;
+
+% LOAD PARAMETERS
+%	this contains t, tol, maxnnz, num_trials
+run('~/nexpokit/experiments/runtime_parameters');
+
 
 format shortg;
 

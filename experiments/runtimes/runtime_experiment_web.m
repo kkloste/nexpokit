@@ -1,6 +1,6 @@
-experimentname = 'runtime_twitter';
+experimentname = 'runtime_webbase';
 
-datalist = {'twitter_rv-scc'};
+datalist = {'sccwebbase-2001'};
 alglist = { 'expmv', 'half', 'gexpmq', 'gexpm', 'expmimv'};
 
 addpath('~/nexpokit');

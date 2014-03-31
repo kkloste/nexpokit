@@ -9,13 +9,17 @@ echo Nexpokit runtime experiment
 chmod 744 *.sh
 chmod 744 *.m
 
-echo Begin small dataset trials output in   runsmall
+echo 'Begin small dataset trials output in   runsmall\n'
 nohup /p/matlab-7.14/bin/matlab -nodisplay -nodesktop -nojvm -nosplash -singleCompThread -r runtime_experiment > runsmall.txt &
 
-echo Begin twitter trials output in   runtwit
+echo 'Begin twitter trials output in   runtwit\n'
 nohup /p/matlab-7.14/bin/matlab -nodisplay -nodesktop -nojvm -nosplash -singleCompThread -r runtime_experiment_twitter > runtwit.txt &
 
-echo Begin friendster trials output in   runfri
+echo 'Begin friendster trials output in   runfri\n'
 nohup /p/matlab-7.14/bin/matlab -nodisplay -nodesktop -nojvm -nosplash -singleCompThread -r runtime_experiment_friend > runfri.txt &
 
-echo finished calling all experiments
+echo 'Begin webbase trials output in   runweb\n'
+nohup /p/matlab-7.14/bin/matlab -nodisplay -nodesktop -nojvm -nosplash -singleCompThread -r runtime_experiment_webbase > runweb.txt &
+
+
+echo 'finished calling all experiments\n'
