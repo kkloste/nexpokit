@@ -1,13 +1,13 @@
-experimentname = 'runtime_webbase';
+experimentname = 'runtime_friendster';
 
-datalist = {'webbase-2001'};
+datalist = {'com-friendster'};
 alglist = { 'expmv', 'half', 'gexpmq', 'gexpm', 'expmimv'};
 
 addpath('~/nexpokit');
 
 
 num_data = numel(datalist);
-num_trials = 2;
+num_trials = 5;
 num_algs = numel(alglist);
 
 disp(experimentname);
@@ -18,7 +18,7 @@ t = 1;
 % LOAD PARAMETERS
 %	this contains t, tol, maxnnz, num_trials
 run('~/nexpokit/experiments/runtimes/runtime_parameters');
-
+num_trials = 50;
 
 format shortg;
 
@@ -81,15 +81,14 @@ for dataindex = 1:num_data
 			time_vals(alg_num, trial, dataindex) = toc;
 			err_vals(alg_num, trial, dataindex) = norm(x_true - y,1)/normtrue;
 			fprintf('\t %f', time_vals(alg_num, trial, dataindex));
-
+		
 		alg_num = alg_num + 1;
 	% don't comment out the alg_num increment -- that would mess up the dimension of time_vals, etc
 %			tic; [y hpush hstep] = gexpm_hash_mex(P,ind,tol,t);
 %			time_vals(alg_num, trial, dataindex) = toc;
 %			err_vals(alg_num, trial, dataindex) = norm(x_true - y,1)/normtrue;
 %			fprintf('\t %f', time_vals(alg_num, trial, dataindex));
-			fprintf('\t');
-			
+
 		alg_num = alg_num + 1;
 			tic; [y svpush] = expm_svec_mex(P,ind,tol,t,maxnnz);
 			time_vals(alg_num, trial, dataindex) = toc;
@@ -104,13 +103,13 @@ for dataindex = 1:num_data
 		aveerrors = sum(err_vals(:,:,dataindex)')/num_trials;
 		avetimes = sum(time_vals(:,:,dataindex)')/num_trials;
 	fprintf(strcat('\n\n',heading));
-	fprintf('\n ave times'); disp(avetimes);
-	fprintf(' ave error'); disp(aveerrors);
+	fprintf('\n ave error'); disp(aveerrors);
+	fprintf(' ave times'); disp(avetimes);
 
 end % end datasets
 
 save(['/scratch2/dgleich/kyle/nexpokit/' experimentname '_expmv_vectors' '.mat'], 'xtrues', 'seeds', '-v7.3');
-save(['/scratch2/dgleich/kyle/nexpokit/results/' experimentname '.mat'], 'seeds', 'err_vals', 'time_vals', ...
+save(['~/nexpokit/results/' experimentname '.mat'], 'seeds', 'err_vals', 'time_vals', ...
 		'datasizes', '-v7.3');
-
+		
 exit
