@@ -10,9 +10,9 @@ chmod 744 *.sh
 chmod 744 *.m
 
 echo Collect the runtime data from all experiments and process it
-/p/matlab-7.14/bin/matlab -nodisplay -nodesktop -nojvm -nosplash -r degruntime_process > degruntime_proc.txt
+/p/matlab-7.14/bin/matlab -nodisplay -nodesktop -nojvm -nosplash -r degruntime_process > /scratch2/dgleich/kyle/joblog/degruntime_proc.txt
 
 echo Make the plots
-/p/matlab-7.14/bin/matlab -nodisplay -nodesktop -nojvm -nosplash -r degruntime_plot > degruntime_plot.txt
+/p/matlab-7.14/bin/matlab -nodisplay -nodesktop -nojvm -nosplash -r degruntime_plot > /scratch2/dgleich/kyle/joblog/degruntime_plot.txt
 
 echo Plot made!

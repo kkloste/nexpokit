@@ -2,8 +2,8 @@
 
 experimentname = 'runtime';
 addpath('~/nexpokit');
-load(strcat('~/nexpokit/results/' , experimentname));
-
+%load(strcat('~/nexpokit/results/' , experimentname));
+load(strcat('/scratch2/dgleich/kyle/nexpokit/results/' , experimentname));
 % num_graphs
 % num_trials 
 % num_algs 
@@ -22,8 +22,21 @@ graphsizes = datasizes;
 
 numrecords = num_graphs;
 
+  % now load webbase
+  	load(strcat('/scratch2/dgleich/kyle/nexpokit/results/' , experimentname, 'webbase'));
+  
+  	errors(:,:,end:end+numel(datasizes)) = 0;
+  	times(:,:,end:end+numel(datasizes)) = 0;
+  	graphsizes(end:end+numel(datasizes),1) = 0;
+  
+  	errors(:,:,numrecords:end) = err_vals(:,:,:);
+  	times(:,:,numrecords:end) = time_vals(:,:,:);
+  	graphsizes(numrecords:end,1) = datasizes(:);
+  
+  	numrecords = numrecords + numel(datasizes);
+  	
   % now load twitter
-  	load(strcat('~/nexpokit/results/' , experimentname, '_twitter'));
+  	load(strcat('/scratch2/dgleich/kyle/nexpokit/results/' , experimentname, '_twitter'));
   
   	errors(:,:,end:end+numel(datasizes)) = 0;
   	times(:,:,end:end+numel(datasizes)) = 0;
@@ -36,7 +49,7 @@ numrecords = num_graphs;
   	numrecords = numrecords + numel(datasizes);
   
   % now load friendster
-  	load(strcat('~/nexpokit/results/' , experimentname, '_friend'));
+  	load(strcat('/scratch2/dgleich/kyle/nexpokit/results/' , experimentname, '_friend'));
   
   	errors(:,:,end:end+numel(datasizes)) = 0;
   	times(:,:,end:end+numel(datasizes)) = 0;

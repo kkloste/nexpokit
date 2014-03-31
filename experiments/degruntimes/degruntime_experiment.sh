@@ -10,16 +10,16 @@ chmod 744 *.sh
 chmod 744 *.m
 
 echo 'Begin small dataset trials output in   degrunsmall\n'
-nohup /p/matlab-7.14/bin/matlab -nodisplay -nodesktop -nojvm -nosplash -singleCompThread -r degruntime_experiment > degrunsmall.txt &
+nohup /p/matlab-7.14/bin/matlab -nodisplay -nodesktop -nojvm -nosplash -singleCompThread -r degruntime_experiment > /scratch2/dgleich/kyle/joblog/degrunsmall.txt &
 
 echo 'Begin twitter trials output in   degruntwit\n'
-nohup /p/matlab-7.14/bin/matlab -nodisplay -nodesktop -nojvm -nosplash -singleCompThread -r degruntime_experiment_twitter > degruntwit.txt &
+nohup /p/matlab-7.14/bin/matlab -nodisplay -nodesktop -nojvm -nosplash -singleCompThread -r degruntime_experiment_twitter > /scratch2/dgleich/kyle/joblog/degruntwit.txt &
 
 echo 'Begin friendster trials output in   degrunfri\n'
-nohup /p/matlab-7.14/bin/matlab -nodisplay -nodesktop -nojvm -nosplash -singleCompThread -r degruntime_experiment_friend > degrunfri.txt &
+nohup /p/matlab-7.14/bin/matlab -nodisplay -nodesktop -nojvm -nosplash -singleCompThread -r degruntime_experiment_friend > /scratch2/dgleich/kyle/joblog/degrunfri.txt &
 
 echo 'Begin webbase trials output in   degrunweb\n'
-nohup /p/matlab-7.14/bin/matlab -nodisplay -nodesktop -nojvm -nosplash -singleCompThread -r degruntime_experiment_web > degrunweb.txt &
+nohup /p/matlab-7.14/bin/matlab -nodisplay -nodesktop -nojvm -nosplash -singleCompThread -r degruntime_experiment_web > /scratch2/dgleich/kyle/joblog/degrunweb.txt &
 
 
 echo 'finished calling all experiments\n'
