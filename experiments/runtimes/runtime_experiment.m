@@ -17,7 +17,7 @@ t = 1;
 
 % LOAD PARAMETERS
 %	this contains t, tol, maxnnz, num_trials
-run('~/nexpokit/experiments/runtime_parameters');
+run('~/nexpokit/experiments/runtimes/runtime_parameters');
 
 
 format shortg;
