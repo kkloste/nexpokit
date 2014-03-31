@@ -19,7 +19,7 @@ echo 'Begin friendster trials output in   runfri\n'
 nohup /p/matlab-7.14/bin/matlab -nodisplay -nodesktop -nojvm -nosplash -singleCompThread -r runtime_experiment_friend > runfri.txt &
 
 echo 'Begin webbase trials output in   runweb\n'
-nohup /p/matlab-7.14/bin/matlab -nodisplay -nodesktop -nojvm -nosplash -singleCompThread -r runtime_experiment_webbase > runweb.txt &
+nohup /p/matlab-7.14/bin/matlab -nodisplay -nodesktop -nojvm -nosplash -singleCompThread -r runtime_experiment_web > runweb.txt &
 
 
 echo 'finished calling all experiments\n'
