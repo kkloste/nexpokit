@@ -1,4 +1,4 @@
-experimentname = 'runtime';
+experimentname = 'degruntime';
 
 addpath('~/nexpokit/plotting');
 load(strcat('~/nexpokit/results/' , experimentname , '_to_plot') );
@@ -12,7 +12,7 @@ newindexing = [1:num_graphs];
 clf;
 hold all;
 hs = [];
-%alglist = { 'expmv', 'half', 'gsqres', 'gexpmq', 'gexpm', 'expmimv'};
+%alglist = { 'expmv', 'half', 'gsqres', 'gexpmq', 'gexpm', 'expmsvec'};
 colors = 'bcgrmk';
 for id=1:num_algs
 %	plotstr = [colors(id) 'o'];
@@ -32,14 +32,14 @@ hs(end+1) = plot(log10(subset(perm)), log10(subperc(perm,2,id)),[colors(id) '.-'
 	%hs(end+1) = plot(log10(subset(perm)), subperc(perm,3,id),[colors(id) '.--']);
 end
 
-title('Runtimes for tol = 1e-4');
+title('Runtimes for tol = 1e-4, using largest degree nodes');
 xlabel('log10(|V|+|E|)');
 ylabel('log10(runtime) (s)');
-legend(hs,'expmv', 'half', 'gsqres', 'gexpmq', 'gexpm', 'expmimv','Location','Southeast');
+legend(hs,'expmv', 'half', 'gsqres', 'gexpm', 'expmimv','Location','Southeast');
 legend boxoff;
 %xlim([4.5,9.75]);
 set_figure_size([5,3]);
-print(gcf,strcat('runtimes','.eps'),'-depsc2');
+print(gcf,strcat('degruntimes','.eps'),'-depsc2');
 
 	
 %exit
