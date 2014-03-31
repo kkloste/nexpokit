@@ -19,7 +19,6 @@ t = 1;
 %	this contains t, tol, maxnnz, num_trials
 run('~/nexpokit/experiments/degruntimes/degruntime_parameters');
 
-
 format shortg;
 
 fprintf('\n Num of trials = %i \t Num datasets = %i \t tol = %5.8f \t maxnnz = %i \n\n', ...

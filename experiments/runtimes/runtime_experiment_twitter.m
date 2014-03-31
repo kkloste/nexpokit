@@ -18,7 +18,7 @@ t = 1;
 % LOAD PARAMETERS
 %	this contains t, tol, maxnnz, num_trials
 run('~/nexpokit/experiments/runtimes/runtime_parameters');
-
+num_trials = 50;
 
 format shortg;
 

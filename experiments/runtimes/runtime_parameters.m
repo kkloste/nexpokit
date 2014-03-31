@@ -1,4 +1,4 @@
-num_trials = 2;
+num_trials = 100;
 
 maxnnz = 10000;
 tol = 1e-4;
