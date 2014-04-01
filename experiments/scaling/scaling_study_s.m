@@ -2,8 +2,8 @@
 prob = 0.48;
 seq = [1,2,5];
 minsize = 1000;
-%maxsize = 2e9/20; % should give about 2B non-zeros
-maxsize = 2e7/20; % should give about 2B non-zeros
+maxsize = 2e9/20; % should give about 2B non-zeros
+%maxsize = 2e7/20; % should give about 2B non-zeros
 scale = minsize;
 sizes = [];
 while scale <= maxsize

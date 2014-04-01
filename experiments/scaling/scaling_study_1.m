@@ -33,4 +33,5 @@ for si = 1:numel(sizes);
     end
     gdata(si).startdegs = startdeg;
     save 'scaling_1.mat' results gdata
+    clear A;
 end
