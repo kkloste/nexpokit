@@ -113,6 +113,7 @@ struct local_stochastic_graph_exponential
     // inputs
     sparserow* G;
     double t, eps;
+    size_t maxpush; // used to cap work below convergence
     
     // derived
     mwIndex n, N;
@@ -144,8 +145,10 @@ struct local_stochastic_graph_exponential
       
     local_stochastic_graph_exponential(
             sparserow* G_, 
-            const double t_, double eps_) 
-	: G(G_), t(t_), eps(eps_), n(G->n), N(taylordegree(t, eps)),
+            const double t_, double eps_,
+            size_t maxpush_) 
+	: G(G_), t(t_), eps(eps_), maxpush(maxpush_), 
+            n(G->n), N(taylordegree(t, eps)),
             pushcoeff(N+1,0.), sval(std::numeric_limits<lindex>::max()),
             nextind(0), noffset(0),
             lneigh(nstart, sval), 
@@ -320,10 +323,13 @@ struct local_stochastic_graph_exponential
                     }
                     npush += degofi;
                 }
-            
+                
+                if (maxpush > 0 && npush >= maxpush) { break; }
                 if (sumresid < eps*exp(t)) { break; }
                 // terminate when Q is empty, i.e. we've pushed all r(i,j) > exp(t)*eps*/(N*n*psi_j(t))
             }
+            if (sumresid < eps*exp(t)) { break; }
+            if (maxpush > 0 && npush >= maxpush) { break; }
         } // end 'for'
         
         
@@ -362,7 +368,7 @@ void copy_array_to_index_vector(const mxArray* v, std::vector<mwIndex>& vec)
 // [y npushes] = gsqres_mex(A,set,eps,t,debugflag)
 void mexFunction(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])
 {
-    if (nrhs < 2 || nrhs > 5) {
+    if (nrhs < 2 || nrhs > 6) {
         mexErrMsgIdAndTxt("gsqres_mex:wrongNumberArguments",
                           "gsqres_mex needs two to five arguments, not %i", nrhs);
     }
@@ -374,6 +380,7 @@ void mexFunction(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])
     if (nrhs == 5) {
         debugflag = (int)mxGetScalar(prhs[4]);
     }
+    
     DEBUGPRINT(("gsqres_mex: preprocessing start: \n"));
     
     const mxArray* mat = prhs[0];
@@ -397,9 +404,11 @@ void mexFunction(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])
     
     double eps = pow(10,-5);
     double t = 1.;
+    mwIndex maxpush = 0;
 
     if (nrhs >= 4) { t = mxGetScalar(prhs[3]); }
     if (nrhs >= 3) { eps = mxGetScalar(prhs[2]); }
+    if (nrhs >= 6) { maxpush = (mwIndex) mxGetScalar(prhs[5]); }
     
     sparserow G;
     G.m = mxGetM(mat);
@@ -415,7 +424,7 @@ void mexFunction(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])
     DEBUGPRINT(("gsqres_mex: preprocessing end: \n"));
     
     //gexpmq(&G, seeds, hk, t, eps, npushes);
-    local_stochastic_graph_exponential c(&G, t, eps);
+    local_stochastic_graph_exponential c(&G, t, eps, (size_t)maxpush);
     *npushes = c.compute(seeds, hk);
 
     DEBUGPRINT(("gsqres_mex: call to gsqres() done\n"));
