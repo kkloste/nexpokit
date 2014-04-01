@@ -231,7 +231,7 @@ struct local_stochastic_graph_exponential
         std::vector< std::vector< double > > resid(N);
         std::vector< double > y;
 
-	// this is defined earlier, but outside the scope of compute(), so I redefine it here
+        // this is defined earlier, but outside the scope of compute(), so I redefine it here
         std::vector<double> psivec(N+1,0.);
         psivec[N] = 1;
         for (lindex k = 1; k <= N ; k++){
