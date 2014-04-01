@@ -1,0 +1,6 @@
+The goal of this experiment is to test the scaling of our code on forest fire
+samples. I used the code from 
+
+~/dev/graph_models
+
+as a starting point. 
