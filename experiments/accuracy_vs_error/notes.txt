@@ -1,0 +1,7 @@
+ Run compute_tol_*.m to generate all of the data.
+   My computer crashed while running this, so I wrote
+   update_tol*.m to just rerun the stuff that 
+   failed.
+
+ Run plot_tol_accuracy.m to generate the figures.
+
