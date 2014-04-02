@@ -37,6 +37,7 @@ legend boxoff;
 set_figure_size(figdims);
 print(gcf,strcat('maxnnz_vs_norm_edense','.eps'),'-depsc2');
 
+
 %% PLOT : log10(1-norm) (metricsid =1)
 clf;
 hold all
@@ -51,13 +52,13 @@ for dataid=1:num_data
 end
 
 ylim([-5.5,-1]);
-title('expmimv: log10(1-norm error / edge-density) vs. log10(maxnnz)');
+title('expmimv: log10(1-norm error) vs. log10(maxnnz)');
 xlabel('log10(maxnnz)');
 ylabel('log10(1-norm error / edge-density)');
 legend('itdk0304', 'dblp-2010', 'flickr-scc', 'ljournal-2008', 'webbase-2001','twitter-2010','friendster','Location','Northeast');
 legend boxoff;
 set_figure_size(figdims);
-print(gcf,strcat('maxnnz_vs_norm_edense','.eps'),'-depsc2');
+print(gcf,strcat('maxnnz_vs_norm','.eps'),'-depsc2');
 
 
 %% PLOT : kendall (metricsid = 2)
