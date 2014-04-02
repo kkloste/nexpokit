@@ -1,21 +1,26 @@
 
 rng(1); % reset the random generator
 
-ntrials = 25;
+ntrials = 100;
 topks = [10,25,100,1000];
-nets = [11:16];
+nets = {'dblp-cc','flickr-scc','itdk0304-cc','ljournal-2008'};
 nsteps = 10;
-nmults = [2 5 10 15 25 50];
-storetols = [1e-4 1e-5];
+nmults = [2 5 10];
+storetols = [1e-3 1e-4 1e-5];
 
-clear record recordnn recordeffmv recordts recordtsnn ...
-    recordtau recordtaunn recordtstau recordtstaunn recordstol
+load 'steps_accuracy.mat'
+if exist('t','var')
+    tstart = t;
+    nidstart = nid;
+end
 
-for network_id=nets;
-    name = graphnames(network_id);
-    A = load_graph(name);
-    P = sparse(normout(A)');
+for nid=1:numel(nets);
+    net = nets{nid};
+    network_id = nid;
+    P = load_staged_data(net);
+    A = P;
     n = size(P,1);
+    nz = nnz(A);
     %p = randperm(n); % generate a random list of nodes
     % Pick nodes propotional to their degree by using miniverts on the
     % edges.
@@ -38,11 +43,17 @@ for network_id=nets;
             pickedverts(v) = 1;
         end
     end
-    maxsteps = ceil(logspace(2,log10(10*n),nsteps));
+    maxsteps = ceil(logspace(2,log10(10*nz),nsteps));
     tols = logspace(-2,-8,nsteps);
+    
+    fprintf('starting trials on net %s\n',net);
+    if nid < nidstart, continue; end 
+    
     
     for t=1:ntrials
         j = p(t); % get the tth entry in the random list, it's a ranodm node!
+        
+        if nid==nidstart && t<=tstart, continue; end
         
         xtrue = kmatexp(P,j,ceil(10*log(n)/log(2))); % compute the exact solution
         [~,px] = sort(xtrue,'descend');
@@ -53,16 +64,15 @@ for network_id=nets;
         nleft = sum(isfinite(xtruenn));
         
         for ti=1:numel(storetols)
-            [~,~,npushest] = gexpmq_mex(P,j,11,storetols(ti),50*n);
+            [~,npushest] = gsqres_mex(A,j,storetols(ti),1.,0); 
             recordstol(network_id,ti,t) = npushest/nnz(A);
+            fprintf('net = %-15s  trial = %3i   tol = %i\n', net, t, ti);
         end
         
         for si=1:nsteps
             ns = maxsteps(si);
             tol = tols(si);            
-            [xapprox asteps npushes] = gexpmq_mex(P,j,11,tol,ns);
-            
-            
+            [xapprox,npushes] = gsqres_mex(A,j,tol,1.,0,ns); 
             
             [~,pxa] = sort(xapprox,'descend');
             xapproxnn = xapprox;
@@ -83,6 +93,8 @@ for network_id=nets;
                 recordnn(network_id,si,t,ki) = numel(intersect(pxnn(1:k),pxann(1:k)))/k;
                 recordtaunn(network_id,si,t,ki) = corr(xapproxnn(pxnn(1:k)),xtruenn(pxnn(1:k)),'type','Kendall');
             end
+            
+            fprintf('net = %-15s  trial = %3i   nsteps = %i\n', net, t, ns);
         end
         
         for nmi = 1:numel(nmults)
@@ -107,10 +119,17 @@ for network_id=nets;
                 recordtsnn(network_id,nmi,t,ki) = numel(intersect(pxnn(1:k),pxann(1:k)))/k;
                 recordtstaunn(network_id,nmi,t,ki) = corr(xapproxnn(pxnn(1:k)),xtruenn(pxnn(1:k)),'type','Kendall');
             end
+            
+            fprintf('net = %-15s  trial = %3i   nmult = %i\n', net, t, nterms);
         end
+        save 'steps_accuracy.mat' record recordnn recordeffmv ...
+            recordts recordtsnn recordtau recordtaunn recordtstau recordtstaunn ...
+            recordstol ...
+            nsteps nmults ntrials topks nets storetols nid t;
+        pause(1);
     end
 end
-save 'test_steps_accuracy.mat' record recordnn recordeffmv ...
+save 'steps_accuracy.mat' record recordnn recordeffmv ...
     recordts recordtsnn recordtau recordtaunn recordtstau recordtstaunn ...
     recordstol ...
     nsteps nmults ntrials topks nets storetols;

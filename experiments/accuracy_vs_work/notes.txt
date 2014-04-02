@@ -1,0 +1,9 @@
+compute_steps_accuracy_order will compute all of the data
+It runs 100 trials, but we don't really need that many.
+
+update_steps_accuracy_order will continue the experiment
+if it crashes, or if you want to kill it.
+
+plot_steps_accuracy 
+plot_steps_order
+
