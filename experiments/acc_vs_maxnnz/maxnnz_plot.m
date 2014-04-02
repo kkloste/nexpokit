@@ -1,3 +1,5 @@
+% nohup /p/matlab-7.14/bin/matlab -nodisplay -nodesktop -nojvm -nosplash -singleCompThread -r maxnnz_plot > /scratch2/dgleich/kyle/joblog/accmaxplot.txt &
+
 experimentname = 'acc_maxnnz';
 experiment_directory = '/scratch2/dgleich/kyle/nexpokit/results/';
 
@@ -162,3 +164,4 @@ legend boxoff;
 set_figure_size(figdims);
 print(gcf,strcat('maxnnz_vs_Precision_edense','.eps'),'-depsc2');
 
+exit
