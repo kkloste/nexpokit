@@ -15,7 +15,7 @@ acc_xaxis = zeros(num_maxnnzs,1);
 maxnnzs = [100,200,500,1000,2000,5000,10000];
 topks = [25,100,1000];
 
-figdims = [4,3];
+figdims = [3,3];
 
 %	%% PLOT : log10(1-norm / edgedensity) (metricsid =1)
 %	clf;
@@ -31,9 +31,9 @@ figdims = [4,3];
 %	end
 %
 %	ylim([-5.5,-1]);
-%	title('expmimv: log10(1-norm error / edge-density) vs. log10(maxnnz)');
+%	title('Error (1-norm) vs. Nonzeros used');
 %	xlabel('log10(maxnnz)');
-%	ylabel('log10(1-norm error / edge-density)');
+%	ylabel('log10(error / edge-density)');
 %	legend('A','B','C','D','E','F','G','Location','Northeast');
 %	legend boxoff;
 %	set_figure_size(figdims);
@@ -54,9 +54,9 @@ for dataid=1:num_data
 end
 
 ylim([-5.5,-1]);
-title('expmimv: log10(1-norm error) vs. log10(maxnnz)');
+title('Error (1-norm) vs. Nonzeros used');
 xlabel('log10(maxnnz)');
-ylabel('log10(1-norm error / edge-density)');
+ylabel('log10(error / edge-density)');
 legend('A','B','C','D','E','F','G','Location','Northeast');
 legend boxoff;
 set_figure_size(figdims);
@@ -78,7 +78,7 @@ print(gcf,strcat('maxnnz_vs_norm','.eps'),'-depsc2');
 %	end
 %	hx = graph2d.constantline(xline, 'LineStyle','--','Color',[.7 .7 .7]);
 %%
-%	title('expmimv: Kendall Tau vs. log10(maxnnz)');
+%	title('Kendall Tau accuracy vs. Nonzeros used');
 %	xlabel('log10(maxnnz)');
 %	ylabel('Kendall Tau');
 %	legend('A','B','C','D','E','F','G','Location','Southeast');
@@ -105,7 +105,7 @@ end
 hx = graph2d.constantline(xline, 'LineStyle','--','Color',[.7 .7 .7]);
 changedependvar(hx,'x');
 
-title('expmimv: Set Precision vs. log10(maxnnz)');
+title('Set Precision vs. Nonzeros used');
 xlabel('log10(maxnnz)');
 ylabel('Set Precision');
 legend('A','B','C','D','E','F','G','Location','Southeast');
@@ -131,7 +131,7 @@ end
 hx = graph2d.constantline(xline, 'LineStyle','--','Color',[.7 .7 .7]);
 changedependvar(hx,'x');
 
-title('expmimv: Set Precision vs. log10(maxnnz/edgedensity)');
+title('Set Precision vs. Nonzeros used');
 xlabel('log10(maxnnz/edgedensity)');
 ylabel('Set Precision');
 legend('A','B','C','D','E','F','G','Location','Southeast');
