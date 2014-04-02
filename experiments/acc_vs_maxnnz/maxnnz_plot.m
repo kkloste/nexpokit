@@ -17,27 +17,27 @@ topks = [25,100,1000];
 
 figdims = [4,3];
 
-%% PLOT : log10(1-norm / edgedensity) (metricsid =1)
-clf;
-hold all
-metricsid = 1; % use 1-norm
-topksid = 1; % doesn't matter, since 1-norm is same for all
-for dataid=1:num_data
-    xaxis = log10(maxnnzs);
-%    xaxis = log10(maxnnzs./edgedensity(dataid));
-%    xaxis = maxnnzs;
-%    xaxis = maxnnzs./edgedensity(dataid);
-    plot(xaxis, squeeze(acc_data(metricsid,dataid,:,topksid)) - log10(edgedensity(dataid)) );
-end
-
-ylim([-5.5,-1]);
-title('expmimv: log10(1-norm error / edge-density) vs. log10(maxnnz)');
-xlabel('log10(maxnnz)');
-ylabel('log10(1-norm error / edge-density)');
-legend('itdk0304', 'dblp-2010', 'flickr-scc', 'ljournal-2008', 'webbase-2001','twitter-2010','friendster','Location','Northeast');
-legend boxoff;
-set_figure_size(figdims);
-print(gcf,strcat('maxnnz_vs_norm_edense','.eps'),'-depsc2');
+%	%% PLOT : log10(1-norm / edgedensity) (metricsid =1)
+%	clf;
+%	hold all
+%	metricsid = 1; % use 1-norm
+%	topksid = 1; % doesn't matter, since 1-norm is same for all
+%	for dataid=1:num_data
+%		xaxis = log10(maxnnzs);
+%	%    xaxis = log10(maxnnzs./edgedensity(dataid));
+%	%    xaxis = maxnnzs;
+%	%    xaxis = maxnnzs./edgedensity(dataid);
+%		plot(xaxis, squeeze(acc_data(metricsid,dataid,:,topksid)) - log10(edgedensity(dataid)) );
+%	end
+%
+%	ylim([-5.5,-1]);
+%	title('expmimv: log10(1-norm error / edge-density) vs. log10(maxnnz)');
+%	xlabel('log10(maxnnz)');
+%	ylabel('log10(1-norm error / edge-density)');
+%	legend('A','B','C','D','E','F','G','Location','Northeast');
+%	legend boxoff;
+%	set_figure_size(figdims);
+%	print(gcf,strcat('maxnnz_vs_norm_edense','.eps'),'-depsc2');
 
 
 %% PLOT : log10(1-norm) (metricsid =1)
@@ -57,60 +57,35 @@ ylim([-5.5,-1]);
 title('expmimv: log10(1-norm error) vs. log10(maxnnz)');
 xlabel('log10(maxnnz)');
 ylabel('log10(1-norm error / edge-density)');
-legend('itdk0304', 'dblp-2010', 'flickr-scc', 'ljournal-2008', 'webbase-2001','twitter-2010','friendster','Location','Northeast');
+legend('A','B','C','D','E','F','G','Location','Northeast');
 legend boxoff;
 set_figure_size(figdims);
 print(gcf,strcat('maxnnz_vs_norm','.eps'),'-depsc2');
 
 
-%% PLOT : kendall (metricsid = 2)
-clf;
-hold all
-metricsid = 2; % usekendall
-topksid = 3; % 25,100,1000
-xlineorig = topks(topksid);
-for dataid=1:num_data
-    xaxis = log10(maxnnzs); xline = log10(xlineorig);
-%    xaxis = log10(maxnnzs./edgedensity(dataid)); xline = log10(xlineorig);
-%    xaxis = maxnnzs; xline = xlineorig;
-%    xaxis = maxnnzs./edgedensity(dataid); xline = xlineorig;
-    plot(xaxis, squeeze(acc_data(metricsid,dataid,:,topksid)));    
-end
-hx = graph2d.constantline(xline, 'LineStyle','--','Color',[.7 .7 .7]);
-changedependvar(hx,'x');
+%	%% PLOT : kendall (metricsid = 2)
+%	clf;
+%	hold all
+%	metricsid = 2; % usekendall
+%	topksid = 3; % 25,100,1000
+%	xlineorig = topks(topksid);
+%	for dataid=1:num_data
+%		xaxis = log10(maxnnzs); xline = log10(xlineorig);
+%	%    xaxis = log10(maxnnzs./edgedensity(dataid)); xline = log10(xlineorig);
+%	%    xaxis = maxnnzs; xline = xlineorig;
+%	%    xaxis = maxnnzs./edgedensity(dataid); xline = xlineorig;
+%		plot(xaxis, squeeze(acc_data(metricsid,dataid,:,topksid)));    
+%	end
+%	hx = graph2d.constantline(xline, 'LineStyle','--','Color',[.7 .7 .7]);
+%%
+%	title('expmimv: Kendall Tau vs. log10(maxnnz)');
+%	xlabel('log10(maxnnz)');
+%	ylabel('Kendall Tau');
+%	legend('A','B','C','D','E','F','G','Location','Southeast');
+%	legend boxoff;
+%	set_figure_size(figdims);
+%	print(gcf,strcat('maxnnz_vs_Kendall','.eps'),'-depsc2');
 
-title('expmimv: Kendall Tau vs. log10(maxnnz)');
-xlabel('log10(maxnnz)');
-ylabel('Kendall Tau');
-legend('itdk0304', 'dblp-2010', 'flickr-scc', 'ljournal-2008', 'webbase-2001','twitter-2010','friendster','Location','Southeast');
-legend boxoff;
-set_figure_size(figdims);
-print(gcf,strcat('maxnnz_vs_Kendall','.eps'),'-depsc2');
-
-
-%% PLOT : kendall edense (metricsid = 2)
-clf;
-hold all
-metricsid = 2; % usekendall
-topksid = 3; % 25,100,1000
-xlineorig = topks(topksid);
-for dataid=1:num_data
-%    xaxis = log10(maxnnzs); xline = log10(xlineorig);
-    xaxis = log10(maxnnzs./edgedensity(dataid)); xline = log10(xlineorig);
-%    xaxis = maxnnzs; xline = xlineorig;
-%    xaxis = maxnnzs./edgedensity(dataid); xline = xlineorig;
-    plot(xaxis, squeeze(acc_data(metricsid,dataid,:,topksid)));    
-end
-hx = graph2d.constantline(xline, 'LineStyle','--','Color',[.7 .7 .7]);
-changedependvar(hx,'x');
-
-title('expmimv: Kendall Tau vs. log10(maxnnz/edgedensity)');
-xlabel('log10(maxnnz/edgedensity)');
-ylabel('Kendall Tau');
-legend('itdk0304', 'dblp-2010', 'flickr-scc', 'ljournal-2008', 'webbase-2001','twitter-2010','friendster','Location','Southeast');
-legend boxoff;
-set_figure_size(figdims);
-print(gcf,strcat('maxnnz_vs_Kendall_edense','.eps'),'-depsc2');
 
 
 %% PLOT : intersect (metricsid = 3)
@@ -133,7 +108,7 @@ changedependvar(hx,'x');
 title('expmimv: Set Precision vs. log10(maxnnz)');
 xlabel('log10(maxnnz)');
 ylabel('Set Precision');
-legend('itdk0304', 'dblp-2010', 'flickr-scc', 'ljournal-2008', 'webbase-2001','twitter-2010','friendster','Location','Southeast');
+legend('A','B','C','D','E','F','G','Location','Southeast');
 legend boxoff;
 set_figure_size(figdims);
 print(gcf,strcat('maxnnz_vs_Precision','.eps'),'-depsc2');
@@ -159,7 +134,7 @@ changedependvar(hx,'x');
 title('expmimv: Set Precision vs. log10(maxnnz/edgedensity)');
 xlabel('log10(maxnnz/edgedensity)');
 ylabel('Set Precision');
-legend('itdk0304', 'dblp-2010', 'flickr-scc', 'ljournal-2008', 'webbase-2001','twitter-2010','friendster','Location','Southeast');
+legend('A','B','C','D','E','F','G','Location','Southeast');
 legend boxoff;
 set_figure_size(figdims);
 print(gcf,strcat('maxnnz_vs_Precision_edense','.eps'),'-depsc2');
