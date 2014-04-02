@@ -23,7 +23,7 @@ graphsizes = datasizes;
 numrecords = num_graphs;
 
   % now load webbase
-  	load(strcat('/scratch2/dgleich/kyle/nexpokit/results/' , experimentname, 'webbase'));
+  	load(strcat('/scratch2/dgleich/kyle/nexpokit/results/' , experimentname, '_webbase'));
   
   	errors(:,:,end:end+numel(datasizes)) = 0;
   	times(:,:,end:end+numel(datasizes)) = 0;
