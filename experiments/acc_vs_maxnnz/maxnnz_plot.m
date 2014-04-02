@@ -15,7 +15,7 @@ acc_xaxis = zeros(num_maxnnzs,1);
 maxnnzs = [100,200,500,1000,2000,5000,10000];
 topks = [25,100,1000];
 
-figdims = [3,4];
+figdims = [4,3];
 
 %% PLOT : log10(1-norm / edgedensity) (metricsid =1)
 clf;
