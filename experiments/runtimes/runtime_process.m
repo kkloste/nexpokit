@@ -1,8 +1,12 @@
 % combine the data from the smaller graphs with twitter and friendster
+% /p/matlab-7.14/bin/matlab -nodisplay -nodesktop -nojvm -nosplash -r runtime_process > /scratch2/dgleich/kyle/joblog/runtime_proc.txt
 
 experimentname = 'runtime';
+experiment_directory = '/scratch2/dgleich/kyle/nexpokit/results/';
+
 addpath('~/nexpokit');
-load(strcat('~/nexpokit/results/' , experimentname));
+%load(strcat('~/nexpokit/results/' , experimentname));
+load(strcat(experiment_directory, experimentname));
 
 % num_graphs
 % num_trials 
@@ -22,31 +26,29 @@ graphsizes = datasizes;
 
 numrecords = num_graphs;
 
+  % now load webbase
+  	load(strcat(experiment_directory , experimentname, '_webbase'));
+  	numrecords = numrecords + 1;
+  	newtrialsnum = size(err_vals,2);
+  	errors(:,1:newtrialsnum,numrecords) = err_vals(:,:);
+  	times(:,1:newtrialsnum,numrecords) = time_vals(:,:);
+  	graphsizes(numrecords,1) = datasizes(:);
+  	
   % now load twitter
-  	load(strcat('~/nexpokit/results/' , experimentname, '_twitter'));
-  
-  	errors(:,:,end:end+numel(datasizes)) = 0;
-  	times(:,:,end:end+numel(datasizes)) = 0;
-  	graphsizes(end:end+numel(datasizes),1) = 0;
-  
-  	errors(:,:,numrecords:end) = err_vals(:,:,:);
-  	times(:,:,numrecords:end) = time_vals(:,:,:);
-  	graphsizes(numrecords:end,1) = datasizes(:);
-  
-  	numrecords = numrecords + numel(datasizes);
+  	load(strcat(experiment_directory , experimentname, '_twitter'));
+  	numrecords = numrecords + 1;
+  	newtrialsnum = size(err_vals,2);  	
+  	errors(:,1:newtrialsnum,numrecords) = err_vals(:,:);
+  	times(:,1:newtrialsnum,numrecords) = time_vals(:,:);
+  	graphsizes(numrecords,1) = datasizes(:);
   
   % now load friendster
-  	load(strcat('~/nexpokit/results/' , experimentname, '_friend'));
-  
-  	errors(:,:,end:end+numel(datasizes)) = 0;
-  	times(:,:,end:end+numel(datasizes)) = 0;
-  	graphsizes(end:end+numel(datasizes),1) = 0;
-  
-  	errors(:,:,numrecords:end) = err_vals(:,:,:);
-  	times(:,:,numrecords:end) = time_vals(:,:,:);
-  	graphsizes(numrecords:end,1) = datasizes(:);
-  
-  	numrecords = numrecords + numel(datasizes);
+  	load(strcat(experiment_directory , experimentname, '_friendster'));
+  	numrecords = numrecords + 1;
+  	newtrialsnum = size(err_vals,2);  	
+  	errors(:,1:newtrialsnum,numrecords) = err_vals(:,:);
+  	times(:,1:newtrialsnum,numrecords) = time_vals(:,:);
+  	graphsizes(numrecords,1) = datasizes(:);  	
 	
 	
 % errors ( num_algs, num_trials, num_data )
@@ -70,6 +72,6 @@ end
 
 % HAVE ALL DATA for this experiment -- save in plotting/
 
-save(strcat('~/nexpokit/results/', experimentname, '_to_plot', '.mat'), 'percdata', 'graphsizes', 'inputsize','-v7.3');
+save(strcat(experiment_directory, experimentname, '_to_plot', '.mat'), 'percdata', 'graphsizes', 'inputsize','-v7.3');
 	
 exit

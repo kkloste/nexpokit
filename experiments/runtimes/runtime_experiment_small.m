@@ -104,13 +104,13 @@ for dataindex = 1:num_data
 		aveerrors = sum(err_vals(:,:,dataindex)')/num_trials;
 		avetimes = sum(time_vals(:,:,dataindex)')/num_trials;
 	fprintf(strcat('\n\n',heading));
-	fprintf('\n ave error'); disp(aveerrors);
-	fprintf(' ave times'); disp(avetimes);
+	fprintf('\n ave times'); disp(avetimes);
+	fprintf(' ave error'); disp(aveerrors);
 
 end % end datasets
 
 save(['/scratch2/dgleich/kyle/nexpokit/' experimentname '_expmv_vectors' '.mat'], 'xtrues', 'seeds', '-v7.3');
-save(['~/nexpokit/results/' experimentname '.mat'], 'seeds', 'err_vals', 'time_vals', ...
+save(['/scratch2/dgleich/kyle/nexpokit/results/' experimentname '.mat'], 'seeds', 'err_vals', 'time_vals', ...
 		'datasizes', '-v7.3');
 		
 exit

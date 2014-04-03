@@ -10,13 +10,13 @@ chmod 744 *.sh
 chmod 744 *.m
 
 echo Begin small dataset trials output in   runsmall
-/p/matlab-7.14/bin/matlab -nodisplay -nodesktop -nojvm -nosplash -singleCompThread -r runtime_experiment_small > runsmsmall.txt
+/p/matlab-7.14/bin/matlab -nodisplay -nodesktop -nojvm -nosplash -singleCompThread -r runtime_experiment_small > /scratch2/dgleich/kyle/joblog/runsmsmall.txt
 
 echo finished calling all experiments
 
 echo Collect the runtime data from all experiments and process it
 echo Then make the plots
-/p/matlab-7.14/bin/matlab -nodisplay -nodesktop -nosplash -r runtime_plot_small > runsmsmall.txt
+/p/matlab-7.14/bin/matlab -nodisplay -nodesktop -nosplash -r runtime_plot_small > /scratch2/dgleich/kyle/joblog/runsmsmall.txt
 
 echo Plot made!
 
