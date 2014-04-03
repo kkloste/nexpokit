@@ -27,42 +27,24 @@ numrecords = num_graphs;
 
   % now load webbase
   	load(strcat(experiment_directory , experimentname, '_webbase'));
-  
-  	errors(:,:,end:end+numel(datasizes)) = 0;
-  	times(:,:,end:end+numel(datasizes)) = 0;
-  	graphsizes(end:end+numel(datasizes),1) = 0;
-  
-  	errors(:,:,numrecords:end) = err_vals(:,:,:);
-  	times(:,:,numrecords:end) = time_vals(:,:,:);
-  	graphsizes(numrecords:end,1) = datasizes(:);
-  
-  	numrecords = numrecords + numel(datasizes);
+  	numrecords = numrecords + 1;
+  	errors(:,:,numrecords) = err_vals(:,:,:);
+  	times(:,:,numrecords) = time_vals(:,:,:);
+  	graphsizes(numrecords,1) = datasizes(:);
   	
   % now load twitter
   	load(strcat(experiment_directory , experimentname, '_twitter'));
-  
-  	errors(:,:,end:end+numel(datasizes)) = 0;
-  	times(:,:,end:end+numel(datasizes)) = 0;
-  	graphsizes(end:end+numel(datasizes),1) = 0;
-  
-  	errors(:,:,numrecords:end) = err_vals(:,:,:);
-  	times(:,:,numrecords:end) = time_vals(:,:,:);
-  	graphsizes(numrecords:end,1) = datasizes(:);
-  
-  	numrecords = numrecords + numel(datasizes);
+  	numrecords = numrecords + 1;
+  	errors(:,:,numrecords) = err_vals(:,:,:);
+  	times(:,:,numrecords) = time_vals(:,:,:);
+  	graphsizes(numrecords,1) = datasizes(:);
   
   % now load friendster
   	load(strcat(experiment_directory , experimentname, '_friend'));
-  
-  	errors(:,:,end:end+numel(datasizes)) = 0;
-  	times(:,:,end:end+numel(datasizes)) = 0;
-  	graphsizes(end:end+numel(datasizes),1) = 0;
-  
-  	errors(:,:,numrecords:end) = err_vals(:,:,:);
-  	times(:,:,numrecords:end) = time_vals(:,:,:);
-  	graphsizes(numrecords:end,1) = datasizes(:);
-  
-  	numrecords = numrecords + numel(datasizes);
+  	numrecords = numrecords + 1;
+  	errors(:,:,numrecords) = err_vals(:,:,:);
+  	times(:,:,numrecords) = time_vals(:,:,:);
+  	graphsizes(numrecords,1) = datasizes(:);  	
 	
 	
 % errors ( num_algs, num_trials, num_data )
