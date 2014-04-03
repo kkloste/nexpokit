@@ -28,22 +28,22 @@ numrecords = num_graphs;
   % now load webbase
   	load(strcat(experiment_directory , experimentname, '_webbase'));
   	numrecords = numrecords + 1;
-  	errors(:,:,numrecords) = err_vals(:,:,:);
-  	times(:,:,numrecords) = time_vals(:,:,:);
+  	errors(:,:,numrecords) = err_vals(:,:);
+  	times(:,:,numrecords) = time_vals(:,:);
   	graphsizes(numrecords,1) = datasizes(:);
   	
   % now load twitter
   	load(strcat(experiment_directory , experimentname, '_twitter'));
   	numrecords = numrecords + 1;
-  	errors(:,:,numrecords) = err_vals(:,:,:);
-  	times(:,:,numrecords) = time_vals(:,:,:);
+  	errors(:,:,numrecords) = err_vals(:,:);
+  	times(:,:,numrecords) = time_vals(:,:);
   	graphsizes(numrecords,1) = datasizes(:);
   
   % now load friendster
   	load(strcat(experiment_directory , experimentname, '_friend'));
   	numrecords = numrecords + 1;
-  	errors(:,:,numrecords) = err_vals(:,:,:);
-  	times(:,:,numrecords) = time_vals(:,:,:);
+  	errors(:,:,numrecords) = err_vals(:,:);
+  	times(:,:,numrecords) = time_vals(:,:);
   	graphsizes(numrecords,1) = datasizes(:);  	
 	
 	
