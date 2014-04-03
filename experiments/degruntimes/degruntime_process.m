@@ -9,7 +9,7 @@ degreedataname = 'degrees';
 addpath('~/nexpokit');
 %load(strcat('~/nexpokit/results/' , experimentname));
 load(strcat(experiment_directory, experimentname));
-load(strcat(experiment_directory, degreedatname)); % all the node-degree information is stored seperately (by accident)
+load(strcat(experiment_directory, degreedataname)); % all the node-degree information is stored seperately (by accident)
 
 % num_graphs
 % num_degrees
@@ -70,5 +70,5 @@ numrecords = num_graphs;
 % HAVE ALL DATA for this experiment -- save in plotting/
 
 save(strcat(experiment_directory, experimentname, '_to_plot', '.mat'), 'alldegrees', 'errors', 'times', 'graphsizes','-v7.3');
-	
+%%	
 exit

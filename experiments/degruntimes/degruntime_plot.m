@@ -1,7 +1,8 @@
 experimentname = 'degruntime';
+experiment_directory = '/scratch2/dgleich/kyle/nexpokit/results/';
 
 addpath('~/nexpokit/plotting');
-load(strcat('~/nexpokit/results/' , experimentname , '_to_plot') );
+load(strcat(experiment_directory , experimentname , '_to_plot') );
 
 % errors ( num_algs, num_degrees, num_graphs )
 % times ( num_algs, num_degrees, num_graphs )
