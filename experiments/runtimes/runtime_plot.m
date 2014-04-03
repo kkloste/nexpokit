@@ -1,7 +1,9 @@
 experimentname = 'runtime';
+experiment_directory = '/scratch2/dgleich/kyle/nexpokit/results/';
+
 
 addpath('~/nexpokit/plotting');
-load(strcat('~/nexpokit/results/' , experimentname , '_to_plot') );
+load(strcat(experiment_directory, experimentname, '_to_plot') );
 
 [num_graphs, ~, num_algs] = size(percdata);
 % percdata = zeros(num_graphs,3,num_algs);
@@ -42,4 +44,4 @@ set_figure_size([5,3]);
 print(gcf,strcat('runtimes','.eps'),'-depsc2');
 
 	
-%exit
+exit

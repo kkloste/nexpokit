@@ -1,9 +1,12 @@
 % combine the data from the smaller graphs with twitter and friendster
 
 experimentname = 'runtime';
+experiment_directory = '/scratch2/dgleich/kyle/nexpokit/results/';
+
 addpath('~/nexpokit');
 %load(strcat('~/nexpokit/results/' , experimentname));
-load(strcat('/scratch2/dgleich/kyle/nexpokit/results/' , experimentname));
+load(strcat(experiment_directory, experimentname));
+
 % num_graphs
 % num_trials 
 % num_algs 
@@ -23,7 +26,7 @@ graphsizes = datasizes;
 numrecords = num_graphs;
 
   % now load webbase
-  	load(strcat('/scratch2/dgleich/kyle/nexpokit/results/' , experimentname, '_webbase'));
+  	load(strcat(experiment_directory , experimentname, '_webbase'));
   
   	errors(:,:,end:end+numel(datasizes)) = 0;
   	times(:,:,end:end+numel(datasizes)) = 0;
@@ -36,7 +39,7 @@ numrecords = num_graphs;
   	numrecords = numrecords + numel(datasizes);
   	
   % now load twitter
-  	load(strcat('/scratch2/dgleich/kyle/nexpokit/results/' , experimentname, '_twitter'));
+  	load(strcat(experiment_directory , experimentname, '_twitter'));
   
   	errors(:,:,end:end+numel(datasizes)) = 0;
   	times(:,:,end:end+numel(datasizes)) = 0;
@@ -49,7 +52,7 @@ numrecords = num_graphs;
   	numrecords = numrecords + numel(datasizes);
   
   % now load friendster
-  	load(strcat('/scratch2/dgleich/kyle/nexpokit/results/' , experimentname, '_friend'));
+  	load(strcat(experiment_directory , experimentname, '_friend'));
   
   	errors(:,:,end:end+numel(datasizes)) = 0;
   	times(:,:,end:end+numel(datasizes)) = 0;
@@ -83,6 +86,6 @@ end
 
 % HAVE ALL DATA for this experiment -- save in plotting/
 
-save(strcat('~/nexpokit/results/', experimentname, '_to_plot', '.mat'), 'percdata', 'graphsizes', 'inputsize','-v7.3');
+save(strcat(experiment_directory, experimentname, '_to_plot', '.mat'), 'percdata', 'graphsizes', 'inputsize','-v7.3');
 	
 exit
