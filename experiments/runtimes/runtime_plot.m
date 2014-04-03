@@ -41,7 +41,7 @@ end
 title('Runtimes for tol = 1e-4');
 xlabel('log10(|V|+ nnz(P))');
 ylabel('log10(runtime) (s)');
-legend(hs,'expmv', 'half', 'gexpmq', 'gexpm', 'expmimv','Location','Southeast');
+legend(hs,'expmv', 'half', 'gexpmq', 'gexpm', 'expmimv','Location','Northwest');
 legend boxoff;
 %xlim([4.5,9.75]);
 set_figure_size([5,3]);
