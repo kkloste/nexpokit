@@ -1,4 +1,5 @@
 % combine the data from the smaller graphs with twitter and friendster
+% /p/matlab-7.14/bin/matlab -nodisplay -nodesktop -nojvm -nosplash -r runtime_process > /scratch2/dgleich/kyle/joblog/runtime_proc.txt
 
 experimentname = 'runtime';
 experiment_directory = '/scratch2/dgleich/kyle/nexpokit/results/';
