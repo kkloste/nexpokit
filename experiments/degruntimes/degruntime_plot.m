@@ -9,7 +9,7 @@ load(strcat(experiment_directory , experimentname , '_to_plot') );
 % graphsizes ( num_graphs, 1 )
 % alldegrees ( num_degrees, num_graphs )
 
-[num_als, num_degrees, num_graphs] = size(errors);
+[num_algs, num_degrees, num_graphs] = size(errors);
 
 datalist = { 'itdk0304-cc', 'dblp-cc', 'flickr-scc', 'ljournal-2008', 'webbase-2001', 'twitter_rv-scc', 'com-friendster'};
 
