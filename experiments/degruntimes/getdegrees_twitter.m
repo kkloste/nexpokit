@@ -1,4 +1,4 @@
-% nohup /p/matlab-7.14/bin/matlab -nodisplay -nodesktop -nojvm -nosplash -singleCompThread -r getdegrees_web > /scratch2/dgleich/kyle/joblog/getdegweb.txt &
+% nohup /p/matlab-7.14/bin/matlab -nodisplay -nodesktop -nojvm -nosplash -singleCompThread -r getdegrees_twitter > /scratch2/dgleich/kyle/joblog/getdegtwit.txt &
 
 experimentname = 'degrees';
 experimentname = strcat(experimentname, '_twitter');

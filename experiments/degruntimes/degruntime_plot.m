@@ -3,43 +3,40 @@ experimentname = 'degruntime';
 addpath('~/nexpokit/plotting');
 load(strcat('~/nexpokit/results/' , experimentname , '_to_plot') );
 
-[num_graphs, ~, num_algs] = size(percdata);
-% percdata = zeros(num_graphs,3,num_algs);
+% errors ( num_algs, num_degrees, num_graphs )
+% times ( num_algs, num_degrees, num_graphs )
+% graphsizes ( num_graphs, 1 )
+% alldegrees ( num_degrees, num_graphs )
 
-% if you want to omit a dataset, omit it from 'newindexing'
-newindexing = [1:num_graphs];
+[num_als, num_degrees, num_graphs] = size(errors);
 
-clf;
-hold all;
-hs = [];
-%alglist = { 'expmv', 'half', 'gsqres', 'gexpmq', 'gexpm', 'expmsvec'};
-colors = 'bcgrmk';
-for id=1:num_algs
-%	plotstr = [colors(id) 'o'];
-%	scatter(log10(inputsize),percdata(:,2,id),plotstr);
-%	scatter(log10(inputsize),percdata(:,1,id),[colors(id) '.']);
-%	scatter(log10(inputsize),percdata(:,3,id),[colors(id) '.']);
+datalist = { 'itdk0304-cc', 'dblp-cc', 'flickr-scc', 'ljournal-2008', 'webbase-2001', 'twitter_rv-scc', 'com-friendster'};
 
-	% guarantee we plot from smallest to largest by input size
-	subset = inputsize(newindexing);
-	subperc = percdata(newindexing,:,:);
-	[~,perm] = sort(subset);
-hs(end+1) = plot(log10(subset(perm)), log10(subperc(perm,2,id)),[colors(id) '.-']);
-%	plot(log10(subset(perm)), log10(subperc(perm,1,id)),[colors(id) '.--']);
-%	plot(log10(subset(perm)), log10(subperc(perm,3,id)),[colors(id) '.--']);	
-	%hs(end+1) = plot(log10(subset(perm)), subperc(perm,2,id),[colors(id) '.-']);
-	%hs(end+1) = plot(log10(subset(perm)), subperc(perm,1,id),[colors(id) '.--']);
-	%hs(end+1) = plot(log10(subset(perm)), subperc(perm,3,id),[colors(id) '.--']);
-end
+for graphid = 1:num_graphs
+   clf;
+   hold all;
+   hs = [];
 
-title('Runtimes for tol = 1e-4, using largest degree nodes');
-xlabel('log10(|V|+|E|)');
-ylabel('log10(runtime) (s)');
-legend(hs,'expmv', 'half', 'gsqres', 'gexpm', 'expmimv','Location','Southeast');
-legend boxoff;
-%xlim([4.5,9.75]);
-set_figure_size([5,3]);
-print(gcf,strcat('degruntimes','.eps'),'-depsc2');
+   dataname = char(datalist(graphid));
 
+   colors = 'bcgrmk';
+   for id=1:num_algs
+
+	   % guarantee we plot from smallest to largest by input size
+	   subset = alldegrees(:,graphid);
+	   [~,perm] = sort(subset,'ascend');
+	   hs(end+1) = plot(log10(subset(perm)), log10(squeeze(times(id,perm,graphid))),[colors(id) '.-']);
+   end
+
+   title('Runtimes for tol = 1e-4, using largest degree nodes');
+   xlabel('log10(degree)');
+   ylabel('log10(runtime) (s)');
+   legend(hs,'expmv', 'half', 'gexpmq', 'gexpm', 'expmimv','Location','Southeast');
+   legend boxoff;
+   %xlim([4.5,9.75]);
+   set_figure_size([5,3]);
+   print(gcf,strcat('degruntimes_', dataname ,'.eps'),'-depsc2');
+
+end % end GRAPHID for loop
 	
 %exit
