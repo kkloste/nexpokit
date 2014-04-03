@@ -1,3 +1,5 @@
+% nohup /p/matlab-7.14/bin/matlab -nodisplay -nodesktop -nojvm -nosplash -singleCompThread -r getdegrees > /scratch2/dgleich/kyle/joblog/getdeg.txt &
+
 experimentname = 'degrees';
 
 datalist = { 'itdk0304-cc', 'dblp-cc', 'flickr-scc', 'ljournal-2008'}
@@ -34,9 +36,10 @@ for dataindex = 1:num_data
 	
 	d = zeros(n,1);
 	for i=1:n, d(i) = nnz(P(:,i)); end
-	[degrees(:,dataindex) perm] = sort(d,'descend');	
+	[dummy perm] = sort(d,'descend');	
 	seeds(:,dataindex) = perm(whichnodes(1:num_trials)); % the seeds are the largest degree nodes
-
+	degrees(:,dataindex) = dummy(whichnodes(1:num_trials));
+	
 end % end datasets
 
 save(['/scratch2/dgleich/kyle/nexpokit/results/' experimentname  '.mat'], 'degrees', '-v7.3');
