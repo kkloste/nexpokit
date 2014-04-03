@@ -4,3 +4,21 @@ samples. I used the code from
 ~/dev/graph_models
 
 as a starting point. 
+
+The main codes are:
+
+scaling_study_1
+scaling_study_s
+
+Neither run to completon on my machine with 24GB of RAM.
+The first one failed on the largest study due to swapping 
+while generating the graph,. The second one failed in a 
+really strange way. It had plenty of memory, but kept
+the CPU utilization at a low percentage. Not sure what
+happened! We'll make due the best we can.
+
+
+    end
+dt = 1.841560e+03, npush = 2616175484
+dt = 1.633588e+03, npush = 627257594
+>> nnz(y)

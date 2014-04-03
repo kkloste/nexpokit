@@ -11,8 +11,8 @@ while scale <= maxsize
     scale = scale*10;
 end
 sizes(sizes > maxsize) = [];
-ntrials = 25;
-tol=1e-3;
+ntrials = 50;
+tol=1e-4;
 %%
 results = zeros(numel(sizes),ntrials);
 gdata = struct;
@@ -32,4 +32,6 @@ for si = 1:numel(sizes);
         results(si,ti) = dt;
     end
     gdata(si).startdegs = startdeg;
+    save 'scaling_s.mat' results gdata
+    clear A;
 end
