@@ -19,7 +19,7 @@ clf;
 hold all;
 hs = [];
 %alglist = { 'expmv', 'half', 'gsqres', 'gexpmq', 'gexpm', 'expmimv'};
-colors = 'bcgrmk';
+colors = 'kmbrg';
 for id=1:num_algs
 %	plotstr = [colors(id) 'o'];
 %	scatter(log10(inputsize),percdata(:,2,id),plotstr);

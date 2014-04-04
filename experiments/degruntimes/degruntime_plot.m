@@ -29,7 +29,7 @@ for graphid = 1:num_graphs
 	   hs(end+1) = plot(log10(subset(perm)), log10(squeeze(times(id,perm,graphid))),[colors(id) '.-']);
    end
 
-   title('Runtimes for tol = 1e-4, using largest degree nodes');
+   title(strcat(dataname,', tol=10^-4');
    xlabel('log10(degree)');
    ylabel('log10(runtime) (s)');
    legend(hs,'expmv', 'half', 'gexpmq', 'gexpm', 'expmimv','Location','Southeast');
