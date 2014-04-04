@@ -301,8 +301,8 @@ struct local_stochastic_graph_exponential
                     // directly to the solution vector y
                     for (lindex nzi = offsets.first; nzi < offsets.second; ++nzi) {
                         lindex v = lneigh[nzi];
-                        grow_vector_to_index(y, v, 0.);
-                        y[v] += update;
+                        //grow_vector_to_index(y, v, 0.);
+                        //y[v] += update;
                     }
                     npush += degofi;
                 } else {
