@@ -24,7 +24,7 @@ accs = squeeze(data.recordnn(ni,:,:,2));
 h = boxplot(accs','labels',num2str([-2:-1:-8]'));
 set(h,'LineWidth',1.3);
 ylim([-0.1,1.1]);
-xlabel('log10 of residual tolerance');
+xlabel('log10 of error tolerance');
 ylabel(sprintf('Precision at %i', data.topks(ki)));
 box off;
 

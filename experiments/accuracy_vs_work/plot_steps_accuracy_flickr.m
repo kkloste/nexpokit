@@ -1,15 +1,12 @@
-function plot_steps_accuracy
+function plot_steps_accuracy_flickr
 
 data = load('steps_accuracy');
 
 
-make_figure(data, 9, 4); % 9th trial on lj
-make_figure(data, 4, 1); % 4th trial on dblp
-%make_figure(data, 3, 2); % 3th trial on flickr
-%make_figure(data, 25, 2); % 25th trial on flickr
-%make_figure(data, 30, 2); % 30th trial on flickr
-make_figure(data, 50, 3); % 50th trial on itdk
-make_figure(data, 1, 3); % 50th trial on itdk
+make_figure(data, 3, 2); % 3th trial on flickr
+make_figure(data, 25, 2); % 25th trial on flickr
+make_figure(data, 30, 2); % 30th trial on flickr
+
 
 
 function make_figure(data, t, ni)
@@ -33,7 +30,7 @@ set(h(4),'LineWidth',1,'Color','k','LineStyle','-.','Marker','*');
 xlabel('Effective matrix-vector products');
 ylabel('Precision');
 if ni==2 
-    legh = legend('@10','@25','@100','@1000','Location','West');
+    legh = legend('@10','@25','@100','@1000','Location','NorthWest');
 else
     legh = legend('@10','@25','@100','@1000','Location','EastOutside');
 end
@@ -44,24 +41,27 @@ mid = mean(legxd);
 set(leglineobjs(2:2:end),'XData',[mid-0.1,mid+0.1]);
 legend boxoff;
 
-if ni~=2
-    legp = get(legh,'Position');
-    legp(1) = legp(1) - 0.01;
-    %legp(2) = legp(2) + 0.1;
-    set(legh,'Position',legp);
-else
-    legp = get(legh,'Position');
-    legp(1) = 0.23;
-    legp(2) = 0.6;
-    %legp(2) = legp(2) + 0.1;
-    set(legh,'Position',legp);
-end
+% if ni~=2
+%     legp = get(legh,'Position');
+%     legp(1) = legp(1) - 0.01;
+%     %legp(2) = legp(2) + 0.1;
+%     set(legh,'Position',legp);
+% else
+%     legp = get(legh,'Position');
+%     legp(1) = 0.23;
+%     legp(2) = 0.6;
+%     %legp(2) = legp(2) + 0.1;
+%     set(legh,'Position',legp);
+% end
 
 for i=1:numel(data.storetols)
     line([data.recordstol(ni,i,t),data.recordstol(ni,i,t)],[-5,5],'LineWidth',1);
+    if i==3
     h = text(data.recordstol(ni,i,t)*1.05,-0.05,sprintf('tol=10^{%i}',round(log10(data.storetols(i)))),...
         'Rotation',90,'VerticalAlignment','top');
+    end
 end
+
 
 set_figure_size([3,3]);
 
