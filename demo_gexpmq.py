@@ -43,26 +43,26 @@ G = {
   27:set([ 23, 24, 25,]),
 }
 Gvol = 102
-eps = 1.e-3
+eps = 0.000917
  
 ## Estimate column c of 
 ## the matrix exponential vector 
 # G is the graph as a dictionary-of-sets, 
 # eps is set to stopping tolerance
 def compute_psis(N):
-    psis = {}
-    psis[N] = 1.
-    for i in xrange(N-1,-1,-1):
-        psis[i] = psis[i+1]/(float(i+1.))+1.
-    return psis    
+  psis = {}
+  psis[N] = 1.
+  for i in xrange(N-1,-1,-1):
+    psis[i] = psis[i+1]/(float(i+1.))+1.
+  return psis    
 def compute_threshs(eps, N, psis):
-    threshs = {}
-    threshs[0] = (math.exp(1)*eps/float(N))/psis[0]
-    for j in xrange(1, N+1):
-        threshs[j] = threshs[j-1]*psis[j-1]/psis[j]
-    return threshs
+  threshs = {}
+  threshs[0] = (math.exp(1)*eps/float(N))/psis[0]
+  for j in xrange(1, N+1):
+    threshs[j] = threshs[j-1]*psis[j-1]/psis[j]
+  return threshs
 ## Setup parameters and constants
-N = 11  
+N = 6  
 c = 1 # the column to compute
 psis = compute_psis(N)
 threshs = compute_threshs(eps,N,psis)
@@ -92,15 +92,16 @@ for j in xrange(0, N):
     for u in G[i]:   # for neighbors of i
       next = (u, j+1)
       if j == N-1: 
-        if u not in x: x[u] = 0.
-        x[u] += update
+          if u not in x: x[u] = 0.
+          x[u] += update
       else:
-        if next not in r: 
+          if next not in r: 
             r[next] = 0.
             Q.append(u)
-        r[next] += update
-        sumresid += update*psis[j+1]
-      if sumresid < eps: break
+          r[next] += update
+          sumresid += update*psis[j+1]
+    # after all neighbors u
+    if sumresid < eps: break
   if len(Q) == 0: break
   if sumresid < eps: break
   
