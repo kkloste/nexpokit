@@ -155,7 +155,7 @@ struct local_stochastic_graph_exponential
             lp(nstart, std::make_pair(sval, sval)), 
             gmap(nstart, (mwIndex)-1), npush(0)
     {        
-        DEBUGPRINT(("gsqres interior: t=%f eps=%f \n", t, eps));
+        DEBUGPRINT(("gsqres interior: t=%lf eps=%lf \n", t, eps));
         DEBUGPRINT(("gsqres: n=%i N=%i \n", n, N));
         
         // initialize the weights for the different residual partitions
@@ -409,6 +409,7 @@ void mexFunction(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])
     if (nrhs >= 4) { t = mxGetScalar(prhs[3]); }
     if (nrhs >= 3) { eps = mxGetScalar(prhs[2]); }
     if (nrhs >= 6) { maxpush = (mwIndex) mxGetScalar(prhs[5]); }
+    
     
     sparserow G;
     G.m = mxGetM(mat);

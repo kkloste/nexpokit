@@ -20,7 +20,7 @@ make_figure(data, 4, 2);
 
 function make_figure(data, ni, ki)
 
-accs = squeeze(data.recordnn(ni,:,:,2));
+accs = squeeze(data.recordnn(ni,:,:,ki));
 h = boxplot(accs','labels',num2str([-2:-1:-8]'));
 set(h,'LineWidth',1.3);
 ylim([-0.1,1.1]);
