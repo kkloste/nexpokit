@@ -1,10 +1,10 @@
 % /p/matlab-7.14/bin/matlab -nodisplay -nodesktop -nojvm -nosplash -r runtime_plot > /scratch2/dgleich/kyle/joblog/runtime_plot.txt
 
 experimentname = 'runtime';
-experiment_directory = '/scratch2/dgleich/kyle/nexpokit/results/';
+experiment_directory = '../../results/';
 
 
-addpath('~/nexpokit/plotting');
+%addpath('~/nexpokit/plotting');
 load(strcat(experiment_directory, experimentname, '_to_plot') );
 
 [num_graphs, ~, num_algs] = size(percdata);
@@ -21,31 +21,25 @@ hs = [];
 %alglist = { 'expmv', 'half', 'gsqres', 'gexpmq', 'gexpm', 'expmimv'};
 colors = 'bcgrmk';
 for id=1:num_algs
-%	plotstr = [colors(id) 'o'];
-%	scatter(log10(inputsize),percdata(:,2,id),plotstr);
-%	scatter(log10(inputsize),percdata(:,1,id),[colors(id) '.']);
-%	scatter(log10(inputsize),percdata(:,3,id),[colors(id) '.']);
-
 	% guarantee we plot from smallest to largest by input size
 	subset = inputsize(newindexing);
 	subperc = percdata(newindexing,:,:);
 	[~,perm] = sort(subset);
-hs(end+1) = plot(log10(subset(perm)), log10(subperc(perm,2,id)),[colors(id) '.-']);
-%	plot(log10(subset(perm)), log10(subperc(perm,1,id)),[colors(id) '.--']);
-%	plot(log10(subset(perm)), log10(subperc(perm,3,id)),[colors(id) '.--']);	
-	%hs(end+1) = plot(log10(subset(perm)), subperc(perm,2,id),[colors(id) '.-']);
-	%hs(end+1) = plot(log10(subset(perm)), subperc(perm,1,id),[colors(id) '.--']);
-	%hs(end+1) = plot(log10(subset(perm)), subperc(perm,3,id),[colors(id) '.--']);
+    hs(end+1) = loglog(subset(perm), subperc(perm,2,id),[colors(id) '.'],'LineWidth',0.5,'MarkerSize',12);
 end
-
-title('Runtimes for tol = 1e-4');
-xlabel('log10(|V|+ nnz(P))');
-ylabel('log10(runtime) (s)');
-legend(hs,'expmv', 'half', 'gexpmq', 'gexpm', 'expmimv','Location','Northwest');
+set(hs(1),'LineStyle','-','LineWidth',0.5);
+set(hs(2),'LineStyle','-','LineWidth',0.5);
+set(hs(3),'LineStyle','-.','LineWidth',0.5);
+set(hs(4),'LineStyle','-.','LineWidth',0.5);
+set(hs(5),'LineStyle',':','LineWidth',0.5);
+%title('Runtimes for tol = 1e-4');
+xlabel('|V|+ nnz(P)');
+ylabel('runtime (s)');
+legend(hs,'expmv', 'half', 'gexpmq', 'gexpm', 'expmimv','Location','EastOutside');
 legend boxoff;
+set(gca,'XScale','log')
+set(gca,'YScale','log')
+set(gca,'XTick',[1e5 1e6 1e7 1e8 1e9 1e10]);
 %xlim([4.5,9.75]);
-set_figure_size([5,3]);
-print(gcf,strcat('runtimes','.eps'),'-depsc2');
-
-	
-exit
+set_figure_size([5.5,2.5]);
+print(gcf,strcat('runtimes-1e-4','.eps'),'-depsc2');
