@@ -1,7 +1,7 @@
 % /p/matlab-7.14/bin/matlab -nodisplay -nodesktop -nojvm -nosplash -r runtime_plot > /scratch2/dgleich/kyle/joblog/runtime_plot.txt
 
 experimentname = 'runtime';
-experiment_directory = '../../results/';
+experiment_directory = '../results/';
 
 
 %addpath('~/nexpokit/plotting');

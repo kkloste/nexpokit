@@ -1,7 +1,7 @@
 % nohup /p/matlab-7.14/bin/matlab -nodisplay -nodesktop -nojvm -nosplash -singleCompThread -r maxnnz_plot > /scratch2/dgleich/kyle/joblog/accmaxplot.txt &
 
 experimentname = 'acc_maxnnz';
-experiment_directory = '../../results/';
+experiment_directory = '../results/';
 
 load(strcat(experiment_directory, experimentname, '_to_plot') );
 
