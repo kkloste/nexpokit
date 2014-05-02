@@ -59,7 +59,7 @@ for nid=1:numel(nets);
         nleft = sum(isfinite(xtruenn));
         
         for ti=1:numel(storetols)
-            [~,npushest] = gsqres_mex(A,j,storetols(ti),1.,0); 
+            [~,npushest] = gexpmq_mex(A,j,storetols(ti),1.,0); 
             recordstol(network_id,ti,t) = npushest/nnz(A);
             fprintf('net = %-15s  trial = %3i   tol = %i\n', net, t, ti);
         end
@@ -67,7 +67,7 @@ for nid=1:numel(nets);
         for si=1:nsteps
             ns = maxsteps(si);
             tol = tols(si);            
-            [xapprox,npushes] = gsqres_mex(A,j,tol,1.,0,ns); 
+            [xapprox,npushes] = gexpmq_mex(A,j,tol,1.,0,ns); 
             
             [~,pxa] = sort(xapprox,'descend');
             xapproxnn = xapprox;

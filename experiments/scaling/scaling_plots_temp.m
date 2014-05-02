@@ -1,4 +1,4 @@
-
+addpath('../plotting_utils'); % so "set_figure_size.m" is available
 %%
 load temp_results
 results = results(:,1:30);

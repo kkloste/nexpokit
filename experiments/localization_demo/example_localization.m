@@ -1,3 +1,5 @@
+addpath('../plotting_utils'); % so "set_figure_size.m" is available
+
 A = load_graph('flickr-bidir-cc');
 %%
 P = normout(A)';

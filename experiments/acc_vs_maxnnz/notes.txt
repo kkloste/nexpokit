@@ -1,0 +1,5 @@
+Run maxnnz_experiment_*.m to generate all of the data.
+
+Run maxnnz_process.m to gather all data into one file.
+
+Run maxnnz_plots_finalized.m to produce plots.

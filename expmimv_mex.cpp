@@ -1,5 +1,5 @@
 /**
- * @file expm_svec_mex.cpp
+ * @file expmimv_mex.cpp
  * @author Kyle Kloster, David F. Gleich
  */
 
@@ -259,29 +259,29 @@ void copy_array_to_index_vector(const mxArray* v, std::vector<mwIndex>& vec)
 
 
 // USAGE
-// [y npushes] = expm_svec_mex(A,set,eps,t,maxnnz,debugflag)
+// [y npushes] = expmimv_mex(A,set,eps,t,maxnnz,debugflag)
 void mexFunction(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])
 {
     if (nrhs < 2 || nrhs > 6) {
-        mexErrMsgIdAndTxt("expm_svec_mex:wrongNumberArguments",
-                          "expm_svec_mex needs two to six arguments, not %i", nrhs);
+        mexErrMsgIdAndTxt("expmimv_mex:wrongNumberArguments",
+                          "expmimv_mex needs two to six arguments, not %i", nrhs);
     }
     mxAssert(nlhs <= 2, "Too many output arguments");
     if (nrhs == 6) {
         debugflag = (int)mxGetScalar(prhs[5]);
     }
-    DEBUGPRINT(("\n expm_svec_mex: preprocessing start: \n"));
+    DEBUGPRINT(("\n expmimv_mex: preprocessing start: \n"));
     
     const mxArray* mat = prhs[0];
     const mxArray* set = prhs[1];
     
     if ( mxIsSparse(mat) == false ){
-        mexErrMsgIdAndTxt("expm_svec_mex:wrongInputMatrix",
-                          "expm_svec_mex needs sparse input matrix");
+        mexErrMsgIdAndTxt("expmimv_mex:wrongInputMatrix",
+                          "expmimv_mex needs sparse input matrix");
     }
     if ( mxGetM(mat) != mxGetN(mat) ){
-        mexErrMsgIdAndTxt("expm_svec_mex:wrongInputMatrixDimensions",
-                          "expm_svec_mex needs square input matrix");
+        mexErrMsgIdAndTxt("expmimv_mex:wrongInputMatrixDimensions",
+                          "expmimv_mex needs square input matrix");
     }
 
     sparserow G;
@@ -308,28 +308,28 @@ void mexFunction(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])
     if (nrhs >= 4) { t = mxGetScalar(prhs[3]); }
     if (nrhs >= 3) { eps = mxGetScalar(prhs[2]); }
     if ( maxnnz > G.n || maxnnz <= 0 ){
-        mexErrMsgIdAndTxt("expm_svec_mex:wrongParameterMaxnnz",
-                          "expm_svec_mex needs 1 <= maxnnz <= n ");
+        mexErrMsgIdAndTxt("expmimv_mex:wrongParameterMaxnnz",
+                          "expmimv_mex needs 1 <= maxnnz <= n ");
     }
     if ( t <= 0 ){
-        mexErrMsgIdAndTxt("expm_svec_mex:wrongParameterT",
-                          "expm_svec_mex needs 0 < t ");
+        mexErrMsgIdAndTxt("expmimv_mex:wrongParameterT",
+                          "expmimv_mex needs 0 < t ");
     }
 
     if ( eps <= 0 || eps >= 1){
-        mexErrMsgIdAndTxt("expm_svec_mex:wrongParameterEps",
-                          "expm_svec_mex needs 0 < eps < 1 ");
+        mexErrMsgIdAndTxt("expmimv_mex:wrongParameterEps",
+                          "expmimv_mex needs 0 < eps < 1 ");
     }
     
     std::vector< mwIndex > seeds;
     copy_array_to_index_vector( set, seeds );
     sparsevec hk;
     
-    DEBUGPRINT(("expm_svec_mex: preprocessing end: \n"));
+    DEBUGPRINT(("expmimv_mex: preprocessing end: \n"));
     
     expm_svec(&G, seeds, hk, t, eps, maxnnz, npushes);
     
-    DEBUGPRINT(("expm_svec_mex: call to expm_svec() done\n"));
+    DEBUGPRINT(("expmimv_mex: call to expm_svec() done\n"));
     
     if (nlhs > 0) { // sets output "hk" to the heat kernel vector computed
         mxArray* hkvec = mxCreateDoubleMatrix(G.n,1,mxREAL);

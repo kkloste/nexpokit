@@ -28,10 +28,10 @@ Synopsis
 Reusable codes
 --------------
 
-* `gexpm` a pure matlab prototype implementation of the Gauss-Southwell
-  code with a heap
 * `gexpm_mex` a C++ mex implementation of Gauss-Southwell with a heap
-* `gexpmq_mex` a C++ mex implemetation of pseudo-Gauss-Southwell with
+* `gexpmq_mex` a C++ mex implemetation of pseudo-Gauss-Southwell (rounded Gauss-Seidel) with
+  a queue.
+* `expmimv_mex` a C++ mex implemetation of an N step Taylor polynomial via Horner rule and "incomplete" matrix-vector products
   a queue.
 * `kmatexp` a matlab implementation of an N+1 step Taylor polynomial via Horner rule
 * `taydeg.hpp` : contains function for selecting Taylor degree appropriate for input error of “tol”
@@ -43,23 +43,42 @@ Codes from others
 
 * `mexpv` from expokit
 * `expv` from expokit
+For Higham & Al-Mohy's "expmv":
+* `expmv`
+* `expmv_tspan`
+* `normAm`
+* `select_taylor_degree
+* `theta_taylor_half.mat`
+* `theta_taylor_single.mat`
+* `theta_taylor.mat`
+
 
 Results from the paper
 ----------------------
 
 To reproduce figure 2 (left), run:
+	[fig 2 shows the non zeros of the solution, compared to the non zeros used by each algorithm for a particular input tolerance]
 
-    test_tol_accuracy % generate the data
-    plot_tol_accuracy % plot the data
+[ Fig 4 is log10 of error vs. precision ]
+To reproduce figure 4 (top, left), run:
+To reproduce figure 4 (top, right), run:
+To reproduce figure 4 (bottom, left), run:
+To reproduce figure 4 (bottom, right), run:
 
-To reproduce figure 2 (right), run:
+[ Fig 5 is work vs. top-k precision ]
+To reproduce figure 5 (top, left), run:
+To reproduce figure 5 (top, right), run:
+To reproduce figure 5 (bottom, left), run:
+To reproduce figure 5 (bottom, right), run:
 
-    test_steps_accuracy_order
-    plot_steps_accuracy
-    
-To reproduce figure 3, run
+[ Fig 6 is maxxnnz vs. error/precision ]
+To reproduce figure 6 (left), run:
+To reproduce figure 6 (right), run:
 
-    test_runtime_tol4
-    plot_runtime
-    
-    
+[ Fig 7 is size vs. runtime ]
+To reproduce figure 7, run:
+
+[ Fig 8 is synthetic experiments ]
+To reproduce figure 8 (left), run:
+To reproduce figure 8 (middle), run:
+To reproduce figure 8 (right), run:

@@ -27,7 +27,7 @@ for si = 1:numel(sizes);
         p = randi([1,n]);
         startdeg(ti) = sum(A(:,p));
         t0=tic;
-        [y npush] = gsqres_mex(A,p,tol,1.,0); 
+        [y npush] = gexpmq_mex(A,p,tol,1.,0); 
         dt=toc(t0);
         results(si,ti) = dt;
     end

@@ -1,5 +1,5 @@
 function plot_tol_ordering
-
+addpath('../plotting_utils'); % so "set_figure_size.m" is available
 %%
 data = load('test_tol_ordering.mat');
 

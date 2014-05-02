@@ -3,7 +3,7 @@ experimentname = 'runtime_small';
 addpath('~/nexpokit');
 addpath('~/nexpokit/plotting');
 load(strcat('~/nexpokit/results/' , experimentname));
-
+addpath('../plotting_utils'); % so "set_figure_size.m" is available
 % num_graphs
 % num_trials 
 % num_algs 

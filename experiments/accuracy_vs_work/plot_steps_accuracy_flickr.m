@@ -1,7 +1,7 @@
 function plot_steps_accuracy_flickr
 
 data = load('steps_accuracy');
-
+addpath('../plotting_utils'); % so "set_figure_size.m" is available
 
 make_figure(data, 3, 2); % 3th trial on flickr
 make_figure(data, 25, 2); % 25th trial on flickr

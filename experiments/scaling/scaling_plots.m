@@ -1,4 +1,4 @@
-
+addpath('../plotting_utils'); % so "set_figure_size.m" is available
 %% fix the data
 load scaling_1
 results = results(1:17,:)';

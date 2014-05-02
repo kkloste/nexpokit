@@ -67,7 +67,7 @@ for dataindex = 1:num_data
         nleft = sum(isfinite(xtruenn));
 			
 		for maxnnzval = 1:num_maxnnzs,
-			tic; [y svpush] = expm_svec_mex(P,ind,tol,t,maxnnz(maxnnzval));
+			tic; [y svpush] = expmimv_mex(P,ind,tol,t,maxnnz(maxnnzval));
 			time_vals(maxnnzval, trial, dataindex) = toc;
 			err_vals(maxnnzval, trial, dataindex) = norm(xtrue - y,1)/normtrue;
 			

@@ -1,5 +1,5 @@
 % nohup /p/matlab-7.14/bin/matlab -nodisplay -nodesktop -nojvm -nosplash -singleCompThread -r maxnnz_plot > /scratch2/dgleich/kyle/joblog/accmaxplot.txt &
-
+addpath('../plotting_utils'); % so "set_figure_size.m" is available
 experimentname = 'acc_maxnnz';
 experiment_directory = '../results/';
 

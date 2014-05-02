@@ -30,7 +30,7 @@ for nid=1:numel(nets);
         
         for ti=1:numel(tols)
             tol = tols(ti);
-            xapprox = gsqres_mex(A,j,tol,1.,0); 
+            xapprox = gexpmq_mex(A,j,tol,1.,0); 
             [~,pxa] = sort(xapprox,'descend');
             xapproxnn = xapprox;
             xapproxnn(j) = -Inf;

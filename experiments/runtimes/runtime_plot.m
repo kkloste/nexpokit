@@ -3,7 +3,7 @@
 experimentname = 'runtime';
 experiment_directory = '../results/';
 
-
+addpath('../plotting_utils'); % so "set_figure_size.m" is available
 %addpath('~/nexpokit/plotting');
 load(strcat(experiment_directory, experimentname, '_to_plot') );
 

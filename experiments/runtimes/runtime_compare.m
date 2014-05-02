@@ -31,7 +31,7 @@ alg_num = 1;
 fprintf('\n time = %8.7f', time_vals(trial,alg_num));
         
 alg_num = alg_num + 1;
-    tic; [y npush] = gsqres_mex(P,ind,tol,t); time_vals(trial,alg_num) = toc;
+    tic; [y npush] = gexpmq_mex(P,ind,tol,t); time_vals(trial,alg_num) = toc;
     err_vals(trial,alg_num) = norm(x_true - y,1)/normtrue;
 fprintf('\t %8.7f', time_vals(trial,alg_num));
         
@@ -41,12 +41,12 @@ fprintf('\t %8.7f', time_vals(trial,alg_num));
 % fprintf('\t %8.7f', time_vals(trial,alg_num));
 
 alg_num = alg_num + 1;
-    tic; [y hpush hstep] = gexpm_hash_mex(P,ind,tol,t); time_vals(trial,alg_num) = toc;
+    tic; [y hpush hstep] = gexpm_mex(P,ind,tol,t); time_vals(trial,alg_num) = toc;
     err_vals(trial,alg_num) = norm(x_true - y,1)/normtrue;
 fprintf('\t %8.7f', time_vals(trial,alg_num));
 
 alg_num = alg_num + 1;
-    tic; [y svpush] = expm_svec_mex(P,ind,tol,t,maxnnz); time_vals(trial,alg_num) = toc;
+    tic; [y svpush] = expmimv_mex(P,ind,tol,t,maxnnz); time_vals(trial,alg_num) = toc;
     err_vals(trial,alg_num) = norm(x_true - y,1)/normtrue;
 fprintf('\t %8.7f', time_vals(trial,alg_num));
 

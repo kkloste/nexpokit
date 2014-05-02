@@ -1,0 +1,3 @@
+This directory contains the data from our own experiments.
+Each file is named [experiment name]_[graph name].mat
+(where [graph name] is omitted, that file contains data for all small graphs).

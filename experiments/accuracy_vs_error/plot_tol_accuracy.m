@@ -1,5 +1,5 @@
 function plot_tol_accuracy
-
+addpath('../plotting_utils'); % so "set_figure_size.m" is available
 %%
 data = load('tol_accuracy.mat');
 

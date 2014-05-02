@@ -1,7 +1,7 @@
 function plot_steps_accuracy
 
 data = load('steps_accuracy');
-
+addpath('../plotting_utils'); % so "set_figure_size.m" is available
 
 make_figure(data, 9, 4); % 9th trial on lj
 make_figure(data, 4, 1); % 4th trial on dblp

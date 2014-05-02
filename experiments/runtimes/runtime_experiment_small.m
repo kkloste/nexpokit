@@ -73,7 +73,7 @@ for dataindex = 1:num_data
 			fprintf('\t %f', time_vals(alg_num, trial, dataindex));
 
 		alg_num = alg_num + 1;
-			tic; [y npush] = gsqres_mex(P,ind,tol,t);
+			tic; [y npush] = gexpmq_mex(P,ind,tol,t);
 			time_vals(alg_num, trial, dataindex) = toc;
 			err_vals(alg_num, trial, dataindex) = norm(x_true - y,1)/normtrue;
 			fprintf('\t %f', time_vals(alg_num, trial, dataindex));
@@ -85,13 +85,13 @@ for dataindex = 1:num_data
 %			fprintf('\t %f', time_vals(alg_num, trial, dataindex));
 
 		alg_num = alg_num + 1;
-			tic; [y hpush hstep] = gexpm_hash_mex(P,ind,tol,t);
+			tic; [y hpush hstep] = gexpm_mex(P,ind,tol,t);
 			time_vals(alg_num, trial, dataindex) = toc;
 			err_vals(alg_num, trial, dataindex) = norm(x_true - y,1)/normtrue;
 			fprintf('\t %f', time_vals(alg_num, trial, dataindex));
 
 		alg_num = alg_num + 1;
-			tic; [y svpush] = expm_svec_mex(P,ind,tol,t,maxnnz);
+			tic; [y svpush] = expmimv_mex(P,ind,tol,t,maxnnz);
 			time_vals(alg_num, trial, dataindex) = toc;
 			err_vals(alg_num, trial, dataindex) = norm(x_true - y,1)/normtrue;
 			fprintf('\t %f', time_vals(alg_num, trial, dataindex));

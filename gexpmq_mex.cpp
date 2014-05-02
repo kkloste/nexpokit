@@ -1,5 +1,5 @@
 /** 
- * @file gsqres_mex.cpp
+ * @file gexpmq_mex.cpp
  * @author Kyle Kloster, David F. Gleich
  */
 
@@ -155,7 +155,7 @@ struct local_stochastic_graph_exponential
             lp(nstart, std::make_pair(sval, sval)), 
             gmap(nstart, (mwIndex)-1), npush(0)
     {        
-        DEBUGPRINT(("gsqres interior: t=%f eps=%f \n", t, eps));
+        DEBUGPRINT(("gsqres interior: t=%lf eps=%lf \n", t, eps));
         DEBUGPRINT(("gsqres: n=%i N=%i \n", n, N));
         
         // initialize the weights for the different residual partitions
@@ -174,7 +174,7 @@ struct local_stochastic_graph_exponential
         }
         
         if (n > std::numeric_limits<lindex>::max()) {
-            mexErrMsgIdAndTxt("gsqres_mex:unimplemented", 
+            mexErrMsgIdAndTxt("gexpmq_mex:unimplemented", 
                     "support only up to %i elements", 
                     std::numeric_limits<lindex>::max());
         }
@@ -301,8 +301,8 @@ struct local_stochastic_graph_exponential
                     // directly to the solution vector y
                     for (lindex nzi = offsets.first; nzi < offsets.second; ++nzi) {
                         lindex v = lneigh[nzi];
-                        //grow_vector_to_index(y, v, 0.);
-                        //y[v] += update;
+                        grow_vector_to_index(y, v, 0.);
+                        y[v] += update;
                     }
                     npush += degofi;
                 } else {
@@ -365,34 +365,34 @@ void copy_array_to_index_vector(const mxArray* v, std::vector<mwIndex>& vec)
 
 
 // USAGE
-// [y npushes] = gsqres_mex(A,set,eps,t,debugflag)
+// [y npushes] = gexpmq_mex(A,set,eps,t,debugflag)
 void mexFunction(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])
 {
     if (nrhs < 2 || nrhs > 6) {
-        mexErrMsgIdAndTxt("gsqres_mex:wrongNumberArguments",
-                          "gsqres_mex needs two to five arguments, not %i", nrhs);
+        mexErrMsgIdAndTxt("gexpmq_mex:wrongNumberArguments",
+                          "gexpmq_mex needs two to five arguments, not %i", nrhs);
     }
     if ( nlhs > 2 ){
-        mexErrMsgIdAndTxt("gsqres_mex:wrongNumberOutputs",
-                          "gsqres_mex needs two outputs, not %i", nlhs);
+        mexErrMsgIdAndTxt("gexpmq_mex:wrongNumberOutputs",
+                          "gexpmq_mex needs two outputs, not %i", nlhs);
     }
     
     if (nrhs == 5) {
         debugflag = (int)mxGetScalar(prhs[4]);
     }
     
-    DEBUGPRINT(("gsqres_mex: preprocessing start: \n"));
+    DEBUGPRINT(("gexpmq_mex: preprocessing start: \n"));
     
     const mxArray* mat = prhs[0];
     const mxArray* set = prhs[1];
     
     if ( mxIsSparse(mat) == false ){
-        mexErrMsgIdAndTxt("gsqres_mex:wrongInputMatrix",
-                          "gsqres_mex needs sparse input matrix");
+        mexErrMsgIdAndTxt("gexpmq_mex:wrongInputMatrix",
+                          "gexpmq_mex needs sparse input matrix");
     }
     if ( mxGetM(mat) != mxGetN(mat) ){
-        mexErrMsgIdAndTxt("gsqres_mex:wrongInputMatrixDimensions",
-                          "gsqres_mex needs square input matrix");
+        mexErrMsgIdAndTxt("gexpmq_mex:wrongInputMatrixDimensions",
+                          "gexpmq_mex needs square input matrix");
     }
     
     double npushesmem = 0.;
@@ -410,6 +410,7 @@ void mexFunction(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])
     if (nrhs >= 3) { eps = mxGetScalar(prhs[2]); }
     if (nrhs >= 6) { maxpush = (mwIndex) mxGetScalar(prhs[5]); }
     
+    
     sparserow G;
     G.m = mxGetM(mat);
     G.n = mxGetN(mat);
@@ -421,13 +422,13 @@ void mexFunction(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])
     copy_array_to_index_vector( set, seeds );
     sparsevec hk;
     
-    DEBUGPRINT(("gsqres_mex: preprocessing end: \n"));
+    DEBUGPRINT(("gexpmq_mex: preprocessing end: \n"));
     
     //gexpmq(&G, seeds, hk, t, eps, npushes);
     local_stochastic_graph_exponential c(&G, t, eps, (size_t)maxpush);
     *npushes = c.compute(seeds, hk);
 
-    DEBUGPRINT(("gsqres_mex: call to gsqres() done\n"));
+    DEBUGPRINT(("gexpmq_mex: call to gsqres() done\n"));
 
     if (nlhs > 0) { // sets output "hk" to the heat kernel vector computed
         mxArray* hkvec = mxCreateDoubleMatrix(G.n,1,mxREAL);

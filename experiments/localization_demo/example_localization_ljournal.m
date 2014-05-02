@@ -1,3 +1,5 @@
+addpath('../plotting_utils'); % so "set_figure_size.m" is available
+
 P = load_staged_data('ljournal-2008');
 %%
 y = kmatexp(P,1);
@@ -46,13 +48,13 @@ errs1 = zeros(length(tols),1);
 work1 = zeros(length(tols),1);
 nnzs1 = steps;
 for i=1:length(tols)   
-    [xapprox npushes nsteps] = gexpm_hash_mex(P,1,tols(i));
+    [xapprox npushes nsteps] = gexpm_mex(P,1,tols(i));
     work1(i) = npushes;
     nnzs1(i) = nnz(xapprox);
     errs1(i) = norm(xapprox/sum(xapprox)-y/sum(y),1);
 end
 for i=1:length(tols)
-    [xapprox,npushes] = gsqres_mex(P,1,tols(i));
+    [xapprox,npushes] = gexpmq_mex(P,1,tols(i));
     work2(i) = npushes;
     nnzs2(i) = nnz(xapprox);
     errs2(i) = norm(xapprox/sum(xapprox)-y/sum(y),1);
@@ -60,7 +62,7 @@ end
 %%
 nnzsseq = logspace(0.5,4);
 for i=1:numel(nnzsseq)
-    [xapprox npushes] = expm_svec_mex(P,1,1e-5,1.,nnzsseq(i)); 
+    [xapprox npushes] = expmimv_mex(P,1,1e-5,1.,nnzsseq(i)); 
     work3(i) = npushes;
     nnzs3(i) = nnz(xapprox);
     errs3(i) = norm(xapprox/sum(xapprox)-y/sum(y),1);

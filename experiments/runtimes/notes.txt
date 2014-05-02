@@ -1,0 +1,10 @@
+
+The goal of this experiment is to analyze the runtime of our methods on real-world networks
+of a variety of sizes to see how our runtimes scale, as compared with the runtime of expmv.
+
+runtime_experiment_*.m generates all of the data (this takes a long time, as it runs
+	100 trials on each small graph, then 50 trials on each twitter and friendster)
+	
+runtime_process.m gathers all results into plottable data
+
+runtime_plot.m	produces the runtime plot.

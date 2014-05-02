@@ -108,7 +108,7 @@ void gexpm(sparserow* G, std::vector<mwIndex>& set, sparsevec& y,
            double* npushes, double* nsteps, const mwIndex maxsteps)
 {
 	double eps = tol;
-    mwIndex N = 11; // computes N and alters eps
+    mwIndex N = taylordegree(t,eps); // computes N and alters eps
     mwIndex n = G->n;
 
     std::vector<double> psivec(N+1,0.);
@@ -137,9 +137,9 @@ void gexpm(sparserow* G, std::vector<mwIndex>& set, sparsevec& y,
         sumresid += rij*psivec[0];
         r.update(rentry(ri,0),rij); // "update" handles the heap as well
     }
-    DEBUGPRINT(("gexpm_hash: hsize = %i \n", r.hsize));
+    DEBUGPRINT(("gexpm_mex: hsize = %i \n", r.hsize));
     *npushes = 0;
-        DEBUGPRINT(("gexpm_hash: enter for loop \n"));
+        DEBUGPRINT(("gexpm_mex: enter for loop \n"));
     for (mwIndex iter = 0; iter < maxsteps; ++iter) {
         /* STEP 1: pop top element off of heap
          *  * get indices i,j from T
@@ -157,7 +157,7 @@ void gexpm(sparserow* G, std::vector<mwIndex>& set, sparsevec& y,
         // "extractmax" sets the entry to 0, stores the value in rij,
         // the index in ri, removes the entry from the heap, then reheaps.
         ri = r.extractmax(rij);
-DEBUGPRINT(("gexpm_hash: hsize = %i , iter = %i,  sumresid = %.8f,  rij = %.8f \n", r.hsize, iter, sumresid, rij));
+DEBUGPRINT(("gexpm_mex: hsize = %i , iter = %i,  sumresid = %.8f,  rij = %.8f \n", r.hsize, iter, sumresid, rij));
         // decode incides i,j
         mwIndex i = ri%n;
         mwIndex j = ri/n;
@@ -176,7 +176,7 @@ DEBUGPRINT(("gexpm_hash: hsize = %i , iter = %i,  sumresid = %.8f,  rij = %.8f \
             // directly to the solution vector y
             for (mwIndex nzi=G->ai[i]; nzi < G->ai[i+1]; ++nzi){
                 mwIndex v = G->aj[nzi];
-                //y.map[v] += update; // in general case, update = ajv*rijs
+                y.map[v] += update; // in general case, update = ajv*rijs
             }
             *npushes += degofi;
         } else {
@@ -192,7 +192,7 @@ DEBUGPRINT(("gexpm_hash: hsize = %i , iter = %i,  sumresid = %.8f,  rij = %.8f \
             *npushes += degofi;
         }
         if (sumresid < eps*exp(t) || r.hsize == 0) {
-            DEBUGPRINT(("gexpm_hash: BREAK: hsize = %i , iter = %i,  sumresid = %.8f,  rij = %.8f \n", r.hsize, iter, sumresid, rij));
+            DEBUGPRINT(("gexpm_mex: BREAK: hsize = %i , iter = %i,  sumresid = %.8f,  rij = %.8f \n", r.hsize, iter, sumresid, rij));
             *nsteps = (double)iter;
             break;
         }
@@ -218,18 +218,18 @@ void copy_array_to_index_vector(const mxArray* v, std::vector<mwIndex>& vec)
 
 
 // USAGE
-// [y npushes nsteps] = gexpm_hash_mex(A,set,eps,t,debugflag,maxsteps)
+// [y npushes nsteps] = gexpm_mex(A,set,eps,t,debugflag,maxsteps)
 void mexFunction(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])
 {
     if (nrhs < 2 || nrhs > 5) {
-        mexErrMsgIdAndTxt("gexpm_hash_mex:wrongNumberArguments",
-                          "gexpm_hash_mex needs two to five arguments, not %i", nrhs);
+        mexErrMsgIdAndTxt("gexpm_mex:wrongNumberArguments",
+                          "gexpm_mex needs two to five arguments, not %i", nrhs);
     }
     mxAssert(nlhs <= 3, "Too many output arguments");
     if (nrhs == 5) {
         debugflag = (int)mxGetScalar(prhs[4]);
     }
-    DEBUGPRINT(("\n gexpm_hash_mex: preprocessing start: \n"));
+    DEBUGPRINT(("\n gexpm_mex: preprocessing start: \n"));
     
     const mxArray* mat = prhs[0];
     const mxArray* set = prhs[1];
@@ -270,11 +270,11 @@ void mexFunction(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[])
     copy_array_to_index_vector( set, seeds );
     sparsevec hk;
     
-    DEBUGPRINT(("gexpm_hash_mex: preprocessing end: \n"));
+    DEBUGPRINT(("gexpm_mex: preprocessing end: \n"));
     
     gexpm(&G, seeds, hk, t, eps, npushes, nsteps, maxsteps);
     
-    DEBUGPRINT(("gexpm_hash_mex: call to gexpm_hash() done\n"));
+    DEBUGPRINT(("gexpm_mex: call to gexpm() done\n"));
     
     if (nlhs > 0) { // sets output "hk" to the heat kernel vector computed
         mxArray* hkvec = mxCreateDoubleMatrix(G.n,1,mxREAL);
