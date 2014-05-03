@@ -18,7 +18,7 @@ inputsize = [1406134, 1659333, 9884547, 83354774, 1138045345, 1427920369, 367774
 clf;
 hold all;
 hs = [];
-%alglist = { 'expmv', 'half', 'gsqres', 'gexpmq', 'gexpm', 'expmimv'};
+
 colors = 'kmbrg';
 for id=1:num_algs
 	% guarantee we plot from smallest to largest by input size

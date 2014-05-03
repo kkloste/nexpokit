@@ -56,21 +56,18 @@ For Higham & Al-Mohy's "expmv":
 Results from the paper
 ----------------------
 
-To reproduce figure 2 (left), run:
-	[fig 2 shows the non zeros of the solution, compared to the non zeros used by each algorithm for a particular input tolerance]
+To reproduce figures 1 and 2, run:
 	
-	experiment/localization_demo/example_localization_ljournal.m
+		experiment/localization_demo/example_localization_ljournal.m
 
-[ Fig 4 is log10 of error vs. precision ]
-To generate the data for figure 4, run:
+To reproduce figure 4, first generate the data by running:
 
 		experiments/accuracy_vs_error/compute_tol_accuracy_data.m
 
-To reproduce figure 4, run:
+Then, to produce the plots for figure 4, run:
 
 		experiments/accuracy_vs_error/plot_tol_accuracy.m
 		
-[ Fig 5 is work vs. top-k precision ]
 To generate the data for figure 5, run:
 
 		experiments/accuracy_vs_work/compute_steps_accuracy_order.m
@@ -79,21 +76,35 @@ To reproduce figure 5, run:
 
 		experiments/accuracy_vs_work/plot_tol_steps_accuracy.m
 		
+To reproduce figure 6, first generate the data by running:
 
-[ Fig 6 is maxxnnz vs. error/precision ]
-To reproduce figure 6, run:
+		experiments/acc_vs_maxnnz/maxnnz_experiment.m
+		experiments/acc_vs_maxnnz/maxnnz_experiment_web.m
+		experiments/acc_vs_maxnnz/maxnnz_experiment_friend.m				
+		experiments/acc_vs_maxnnz/maxnnz_experiment_twitter.m
+
+Then, to produce the plots for figure 6, run
 
 		experiments/acc_vs_maxnnz/maxnnz_plots_finalized.m
 
-[ Fig 7 is size vs. runtime ]
-To reproduce figure 7, run:
-runtime_plot.m
+To reproduce figure 7, first generate the data by running:
 
-[ Fig 8 is synthetic experiments ]
-scaling study 1
-scaling study 1s
-(generate raw data ^)
-scaling plot (actually generates plot)
-To reproduce figure 8 (left), run:
-To reproduce figure 8 (middle), run:
-To reproduce figure 8 (right), run:
+		experiments/runtimes/runtime_experiment.m
+		experiments/runtimes/runtime_experiment_web.m		
+		experiments/runtimes/runtime_experiment_friend.m		
+		experiments/runtimes/runtime_experiment_twitter.m
+		experiments/runtimes/runtime_process.m		
+
+Then, to produce the plots for figure 7, run:
+
+		experiments/runtimes/runtime_plot.m
+
+To reproduce figure 8, first generate the data by running:
+
+		experiments/scaling/scaling_study_1.m
+		experiments/scaling/scaling_study_s.m
+
+Then, to produce the plots for figure 8, run:
+
+		experiments/scaling/scaling_plots.m
+
